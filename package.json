@@ -8,9 +8,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@makerdao/dai": "^0.42.4",
+    "@makerdao/dai-plugin-governance": "^0.16.7",
     "next": "12.0.10",
     "react": "17.0.2",
-    "react-dom": "17.0.2"
+    "react-dom": "17.0.2",
+    "swr": "^1.2.1"
   },
   "devDependencies": {
     "@types/node": "17.0.18",
