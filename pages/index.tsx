@@ -1,14 +1,32 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import useSWR from 'swr'
+import useSWRImmutable from 'swr/immutable'
+import { ResponsiveLine } from '@nivo/line'
+import {
+  Table,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Skeleton,
+} from '@mui/material'
 
 import getGovernanceData from '../lib/governanceData'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
-  const { data, error } = useSWR('/', getGovernanceData)
-  if (error) console.log(error)
+  const { data, error } = useSWRImmutable('/', getGovernanceData)
+
+  if (error) {
+    console.log(error)
+    return (
+      <div>
+        There was an error trying to load the data, please refresh the site
+      </div>
+    )
+  }
 
   return (
     <div className={styles.container}>
@@ -26,16 +44,111 @@ const Home: NextPage = () => {
       </nav>
 
       <main className={styles.main}>
-        {error && (
-          <div>
-            There was an error trying to load the data, please refresh the site
+        <div>
+          <h3>Top Delegates</h3>
+          {!data ? (
+            <>
+              <Skeleton animation='wave' height={80} />
+              <Skeleton animation='wave' height={80} />
+              <Skeleton animation='wave' height={80} />
+              <Skeleton animation='wave' height={80} />
+            </>
+          ) : (
+            <TableContainer sx={{ maxHeight: 'calc(100% - 62px)' }}>
+              <Table stickyHeader size='small' aria-label='top delegates table'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      align='center'
+                      style={{
+                        textTransform: 'capitalize',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      Delegate
+                    </TableCell>
+                    <TableCell
+                      align='center'
+                      style={{
+                        textTransform: 'capitalize',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      MKR Delegated
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {data.topDelegates.map((delegate, i) => (
+                    <TableRow hover key={i}>
+                      <TableCell align='left'>
+                        {delegate.voteDelegate}
+                      </TableCell>
+                      <TableCell align='center'>
+                        {parseInt(delegate.lockTotal).toLocaleString('en-US')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </div>
+        <div>
+          <h3>Total MKR Delegated</h3>
+          <div className={styles.chartContainer}>
+            {!data ? (
+              <Skeleton
+                variant='rectangular'
+                height={'100%'}
+                animation='wave'
+              />
+            ) : (
+              <ResponsiveLine
+                data={[
+                  {
+                    id: 'MKR delegated',
+                    color: 'hsl(173, 74%, 39%)',
+                    data: data.mkrDelegatedData.map((entry) => ({
+                      x: entry.time,
+                      y: entry.amount,
+                    })),
+                  },
+                ]}
+                xScale={{
+                  type: 'time',
+                  format: '%Y-%m-%dT%H:%M:%SZ',
+                }}
+                xFormat='time:%b %d, %Y'
+                yFormat='.3s'
+                margin={{ left: 60, bottom: 50, top: 10, right: 20 }}
+                colors={{ datum: 'color' }}
+                enablePoints={false}
+                // enableGridX={false}
+                // enableGridY={false}
+                axisLeft={{
+                  legend: 'MKR delegated',
+                  legendOffset: -50,
+                  legendPosition: 'middle',
+                  format: '.0s',
+                }}
+                axisBottom={{
+                  legend: 'Date',
+                  legendOffset: 36,
+                  legendPosition: 'middle',
+                  tickValues: 'every month',
+                  format: '%b %d, %Y',
+                }}
+                isInteractive={true}
+                useMesh={true}
+              />
+            )}
           </div>
-        )}
-        {data ? (
-          data.map((delegate, i) => <div key={i}>{delegate.voteDelegate}</div>)
-        ) : (
-          <div>Loading...</div>
-        )}
+        </div>
+        <div>Hello</div>
+        <div>Hello</div>
+        <div>Hello</div>
+        <div>Hello</div>
       </main>
 
       <footer className={styles.footer}>Built by the GovAlpha Core Unit</footer>

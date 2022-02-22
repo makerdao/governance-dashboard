@@ -2,16 +2,6 @@
   padding: 0;
 }
 
-.main {
-  min-height: 100vh;
-  padding: 0;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
 .nav {
   display: flex;
   flex: 1;
@@ -25,6 +15,24 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.main {
+  min-height: 100vh;
+  padding: 1.5rem 4rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 400px;
+  gap: 2rem;
+}
+
+.delegatesTable {
+  height: calc(100% - 62px);
+  overflow-y: scroll;
+}
+
+.chartContainer {
+  height: calc(100% - 62px);
 }
 
 .footer {
