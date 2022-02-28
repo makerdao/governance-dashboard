@@ -226,10 +226,16 @@ const Home: NextPage = () => {
           <h3>Delegator count</h3>
           <h3>50</h3>
         </Card>
-        <Card className={styles.infoCard}>Hello</Card>
-        <Card className={styles.infoCard}>4141242</Card>
-        <Card className={styles.infoCard}>hello world</Card>
-        <Card className={styles.infoCard}>holizzz!!</Card>
+        <Card className={styles.infoCard}>
+          <h3>Total MKR staked</h3>
+        </Card>
+        <Card className={styles.infoCard}>
+          <h3>Total MKR delegated</h3>
+        </Card>
+        <Card className={styles.infoCard}>
+          <h3>Last poll voter count</h3>
+        </Card>
+        <Card className={styles.infoCard}></Card>
         <Card className={styles.chartCard}>
           <h3>Staked and Delegated MKR</h3>
           <div className={styles.chartContainer}>
