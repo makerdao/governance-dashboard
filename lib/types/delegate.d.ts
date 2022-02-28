@@ -14,9 +14,22 @@ export type DelegationObject = {
 export type DelegateBalance = {
   voteDelegate: string
   lockTotal: string
+  delegatorCount: number
 }
 
 export type MkrDelegatedData = {
   time: Date
   amount: number
+}
+
+export type MkrStakedData = {
+  time: Date
+  amount: number
+  sender: string
+}
+
+export type PollVotersData = {
+  pollId: number
+  month: string
+  uniqueVoters: number
 }
