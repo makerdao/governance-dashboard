@@ -1,8 +1,10 @@
+import { useState, MouseEvent } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import useSWRImmutable from 'swr/immutable'
 import { ResponsiveLine } from '@nivo/line'
+import { ResponsiveBar } from '@nivo/bar'
 import {
   Table,
   TableContainer,
@@ -11,13 +13,35 @@ import {
   TableCell,
   TableBody,
   Skeleton,
+  TableSortLabel,
+  Card,
 } from '@mui/material'
 
-import getGovernanceData from '../lib/governanceData'
+import {
+  getGovernanceData,
+  getStakedMkr,
+  getPollVoters,
+} from '../lib/governanceData'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
-  const { data, error } = useSWRImmutable('/', getGovernanceData)
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc')
+  const [orderBy, setOrderBy] = useState<'lockTotal' | 'delegatorCount'>(
+    'lockTotal'
+  )
+
+  const { data: governanceData, error } = useSWRImmutable(
+    '/governanceData',
+    getGovernanceData
+  )
+  const { data: stakedMkrData } = useSWRImmutable(
+    '/stakedMkrData',
+    getStakedMkr
+  )
+  const { data: pollVotersData } = useSWRImmutable(
+    '/pollVotersData',
+    getPollVoters
+  )
 
   if (error) {
     console.log(error)
@@ -27,6 +51,26 @@ const Home: NextPage = () => {
       </div>
     )
   }
+
+  const handleRequestSort = (
+    event: MouseEvent<unknown>,
+    property: 'lockTotal' | 'delegatorCount'
+  ) => {
+    const isAsc = orderBy === property && order === 'desc'
+    setOrder(isAsc ? 'asc' : 'desc')
+    setOrderBy(property)
+
+    governanceData?.topDelegates.sort((a, b) =>
+      // @ts-ignore
+      isAsc ? a[property] - b[property] : b[property] - a[property]
+    )
+  }
+
+  const handleSort =
+    (property: 'lockTotal' | 'delegatorCount') =>
+    (event: MouseEvent<unknown>) => {
+      handleRequestSort(event, property)
+    }
 
   return (
     <div className={styles.container}>
@@ -44,9 +88,9 @@ const Home: NextPage = () => {
       </nav>
 
       <main className={styles.main}>
-        <div>
+        <Card className={styles.chartCard}>
           <h3>Top Delegates</h3>
-          {!data ? (
+          {!governanceData ? (
             <>
               <Skeleton animation='wave' height={80} />
               <Skeleton animation='wave' height={80} />
@@ -74,15 +118,41 @@ const Home: NextPage = () => {
                         fontWeight: 'bold',
                       }}
                     >
-                      MKR Delegated
+                      <TableSortLabel
+                        active={orderBy === 'delegatorCount'}
+                        direction={
+                          orderBy === 'delegatorCount' ? order : 'desc'
+                        }
+                        onClick={handleSort('delegatorCount')}
+                      >
+                        Delegators
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell
+                      align='center'
+                      style={{
+                        textTransform: 'capitalize',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      <TableSortLabel
+                        active={orderBy === 'lockTotal'}
+                        direction={orderBy === 'lockTotal' ? order : 'desc'}
+                        onClick={handleSort('lockTotal')}
+                      >
+                        MKR Delegated
+                      </TableSortLabel>
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.topDelegates.map((delegate, i) => (
+                  {governanceData.topDelegates.map((delegate, i) => (
                     <TableRow hover key={i}>
                       <TableCell align='left'>
                         {delegate.voteDelegate}
+                      </TableCell>
+                      <TableCell align='center'>
+                        {delegate.delegatorCount}
                       </TableCell>
                       <TableCell align='center'>
                         {parseInt(delegate.lockTotal).toLocaleString('en-US')}
@@ -93,11 +163,11 @@ const Home: NextPage = () => {
               </Table>
             </TableContainer>
           )}
-        </div>
-        <div>
+        </Card>
+        <Card className={styles.chartCard}>
           <h3>Total MKR Delegated</h3>
           <div className={styles.chartContainer}>
-            {!data ? (
+            {!governanceData ? (
               <Skeleton
                 variant='rectangular'
                 height={'100%'}
@@ -109,7 +179,7 @@ const Home: NextPage = () => {
                   {
                     id: 'MKR delegated',
                     color: 'hsl(173, 74%, 39%)',
-                    data: data.mkrDelegatedData.map((entry) => ({
+                    data: governanceData.mkrDelegatedData.map((entry) => ({
                       x: entry.time,
                       y: entry.amount,
                     })),
@@ -121,11 +191,18 @@ const Home: NextPage = () => {
                 }}
                 xFormat='time:%b %d, %Y'
                 yFormat='.3s'
-                margin={{ left: 60, bottom: 50, top: 10, right: 20 }}
+                margin={{ left: 60, bottom: 50, top: 5 }}
+                theme={{
+                  axis: {
+                    legend: {
+                      text: {
+                        fontWeight: 'bold',
+                      },
+                    },
+                  },
+                }}
                 colors={{ datum: 'color' }}
                 enablePoints={false}
-                // enableGridX={false}
-                // enableGridY={false}
                 axisLeft={{
                   legend: 'MKR delegated',
                   legendOffset: -50,
@@ -133,7 +210,7 @@ const Home: NextPage = () => {
                   format: '.0s',
                 }}
                 axisBottom={{
-                  legend: 'Date',
+                  legend: 'Time',
                   legendOffset: 36,
                   legendPosition: 'middle',
                   tickValues: 'every month',
@@ -144,9 +221,144 @@ const Home: NextPage = () => {
               />
             )}
           </div>
-        </div>
-        <div>Hello</div>
-        <div>Hello</div>
+        </Card>
+        <Card className={styles.infoCard}>
+          <h3>Delegator count</h3>
+          <h3>50</h3>
+        </Card>
+        <Card className={styles.infoCard}>Hello</Card>
+        <Card className={styles.infoCard}>4141242</Card>
+        <Card className={styles.infoCard}>hello world</Card>
+        <Card className={styles.infoCard}>holizzz!!</Card>
+        <Card className={styles.chartCard}>
+          <h3>Staked and Delegated MKR</h3>
+          <div className={styles.chartContainer}>
+            {!governanceData || !stakedMkrData ? (
+              <Skeleton
+                variant='rectangular'
+                height={'100%'}
+                animation='wave'
+              />
+            ) : (
+              <ResponsiveLine
+                data={[
+                  {
+                    id: 'MKR staked',
+                    color: 'hsl(173, 74%, 39%)',
+                    data: stakedMkrData.map((entry) => ({
+                      x: entry.time,
+                      y: entry.amount,
+                    })),
+                  },
+                  {
+                    id: 'MKR delegated',
+                    color: 'hsl(41, 90%, 57%)',
+                    data: governanceData.mkrDelegatedData.map((entry) => ({
+                      x: entry.time,
+                      y: entry.amount,
+                    })),
+                  },
+                ]}
+                xScale={{
+                  type: 'time',
+                  format: '%Y-%m-%dT%H:%M:%SZ',
+                }}
+                xFormat='time:%b %d, %Y'
+                yFormat='.3s'
+                margin={{ left: 60, bottom: 50, top: 5 }}
+                theme={{
+                  axis: {
+                    legend: {
+                      text: {
+                        fontWeight: 'bold',
+                      },
+                    },
+                  },
+                }}
+                colors={{ datum: 'color' }}
+                enablePoints={false}
+                // enableGridX={false}
+                // enableGridY={false}
+                axisLeft={{
+                  legend: 'MKR',
+                  legendOffset: -50,
+                  legendPosition: 'middle',
+                  format: '.2s',
+                }}
+                axisBottom={{
+                  legend: 'Time',
+                  legendOffset: 36,
+                  legendPosition: 'middle',
+                  tickValues: 'every 2 months',
+                  format: '%b %d, %Y',
+                }}
+                isInteractive={true}
+                useMesh={true}
+              />
+            )}
+          </div>
+        </Card>
+        <Card className={styles.chartCard}>
+          <h3>Average unique voters per poll per month</h3>
+          <div className={styles.chartContainer}>
+            {!pollVotersData ? (
+              <Skeleton
+                variant='rectangular'
+                height={'100%'}
+                animation='wave'
+              />
+            ) : (
+              <ResponsiveBar
+                data={pollVotersData}
+                keys={['uniqueVoters']}
+                indexBy='month'
+                margin={{ left: 60, bottom: 50, top: 5 }}
+                padding={0.2}
+                theme={{
+                  axis: {
+                    legend: {
+                      text: {
+                        fontWeight: 'bold',
+                      },
+                    },
+                  },
+                }}
+                defs={[
+                  {
+                    id: 'bar-fill',
+                    type: 'patternLines',
+                    background: '#f4b62f',
+                    color: '#f4b62f',
+                  },
+                ]}
+                fill={[
+                  {
+                    match: {
+                      id: 'uniqueVoters',
+                    },
+                    id: 'bar-fill',
+                  },
+                ]}
+                axisLeft={{
+                  legend: 'Voters',
+                  legendOffset: -50,
+                  legendPosition: 'middle',
+                  format: '.2s',
+                }}
+                axisBottom={{
+                  legend: 'Month',
+                  legendOffset: 36,
+                  legendPosition: 'middle',
+                  tickValues: pollVotersData
+                    .filter((entry, i) => i % 3 === 0)
+                    .map((entry) => entry.month),
+                }}
+                isInteractive={true}
+                enableLabel={false}
+              />
+            )}
+          </div>
+        </Card>
         <div>Hello</div>
         <div>Hello</div>
       </main>
