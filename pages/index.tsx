@@ -76,7 +76,7 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <Head>
-        <title>Maker Governance Metrics</title>
+        <title>MakerDAO Governance Dashboard</title>
         <meta
           name='description'
           content='A dashboard containing metrics about MakerDAO governance and delegation'
