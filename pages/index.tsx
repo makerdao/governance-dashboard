@@ -93,14 +93,14 @@ const Home: NextPage = () => {
           <h3>Top Recognized Delegates</h3>
           {!governanceData ? (
             <>
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
             </>
           ) : (
-            <TableContainer sx={{ maxHeight: 'calc(100% - 62px)' }}>
+            <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
               <Table stickyHeader size='small' aria-label='top delegates table'>
                 <TableHead>
                   <TableRow>
@@ -172,14 +172,14 @@ const Home: NextPage = () => {
           <h3>Top Shadow Delegates</h3>
           {!governanceData ? (
             <>
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
-              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
+              <Skeleton animation='wave' height={65} />
             </>
           ) : (
-            <TableContainer sx={{ maxHeight: 'calc(100% - 62px)' }}>
+            <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
               <Table stickyHeader size='small' aria-label='top delegates table'>
                 <TableHead>
                   <TableRow>
@@ -378,11 +378,7 @@ const Home: NextPage = () => {
           <h3>Staked and Delegated MKR</h3>
           <div className={styles.chartContainer}>
             {!governanceData || !stakedMkrData ? (
-              <Skeleton
-                variant='rectangular'
-                height={'100%'}
-                animation='wave'
-              />
+              <Skeleton variant='rectangular' height={'90%'} animation='wave' />
             ) : (
               <ResponsiveLine
                 data={[
@@ -409,7 +405,7 @@ const Home: NextPage = () => {
                 }}
                 xFormat='time:%b %d, %Y'
                 yFormat='.3s'
-                margin={{ left: 60, bottom: 50, top: 5 }}
+                margin={{ left: 60, bottom: 40, top: 5 }}
                 theme={{
                   axis: {
                     legend: {
@@ -446,17 +442,13 @@ const Home: NextPage = () => {
           <h3>Average unique voters per poll per month</h3>
           <div className={styles.chartContainer}>
             {!pollVotersData ? (
-              <Skeleton
-                variant='rectangular'
-                height={'100%'}
-                animation='wave'
-              />
+              <Skeleton variant='rectangular' height={'90%'} animation='wave' />
             ) : (
               <ResponsiveBar
                 data={pollVotersData}
                 keys={['uniqueVoters']}
                 indexBy='month'
-                margin={{ left: 60, bottom: 50, top: 5 }}
+                margin={{ left: 60, bottom: 40, top: 5 }}
                 padding={0.2}
                 theme={{
                   axis: {
