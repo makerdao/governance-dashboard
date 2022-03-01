@@ -12,8 +12,8 @@ import {
   TableRow,
   TableCell,
   TableBody,
-  Skeleton,
   TableSortLabel,
+  Skeleton,
   Card,
 } from '@mui/material'
 
@@ -22,6 +22,7 @@ import {
   getStakedMkr,
   getPollVoters,
 } from '../lib/governanceData'
+import { kFormatter } from '../lib/helpers'
 import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
@@ -88,14 +89,15 @@ const Home: NextPage = () => {
       </nav>
 
       <main className={styles.main}>
-        <Card className={styles.chartCard}>
-          <h3>Top Delegates</h3>
+        <Card className={styles.tableCard}>
+          <h3>Top Recognized Delegates</h3>
           {!governanceData ? (
             <>
-              <Skeleton animation='wave' height={80} />
-              <Skeleton animation='wave' height={80} />
-              <Skeleton animation='wave' height={80} />
-              <Skeleton animation='wave' height={80} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
             </>
           ) : (
             <TableContainer sx={{ maxHeight: 'calc(100% - 62px)' }}>
@@ -146,96 +148,232 @@ const Home: NextPage = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {governanceData.topDelegates.map((delegate, i) => (
-                    <TableRow hover key={i}>
-                      <TableCell align='left'>
-                        {delegate.voteDelegate}
-                      </TableCell>
-                      <TableCell align='center'>
-                        {delegate.delegatorCount}
-                      </TableCell>
-                      <TableCell align='center'>
-                        {parseInt(delegate.lockTotal).toLocaleString('en-US')}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {governanceData.topDelegates
+                    .filter((delegate) => delegate.status === 'recognized')
+                    .map((delegate, i) => (
+                      <TableRow hover key={i}>
+                        <TableCell align='left'>
+                          {delegate.name || delegate.voteDelegate}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {delegate.delegatorCount}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {parseInt(delegate.lockTotal).toLocaleString('en-US')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                 </TableBody>
               </Table>
             </TableContainer>
           )}
         </Card>
-        <Card className={styles.chartCard}>
-          <h3>Total MKR Delegated</h3>
-          <div className={styles.chartContainer}>
-            {!governanceData ? (
-              <Skeleton
-                variant='rectangular'
-                height={'100%'}
-                animation='wave'
-              />
-            ) : (
-              <ResponsiveLine
-                data={[
-                  {
-                    id: 'MKR delegated',
-                    color: 'hsl(173, 74%, 39%)',
-                    data: governanceData.mkrDelegatedData.map((entry) => ({
-                      x: entry.time,
-                      y: entry.amount,
-                    })),
-                  },
-                ]}
-                xScale={{
-                  type: 'time',
-                  format: '%Y-%m-%dT%H:%M:%SZ',
-                }}
-                xFormat='time:%b %d, %Y'
-                yFormat='.3s'
-                margin={{ left: 60, bottom: 50, top: 5 }}
-                theme={{
-                  axis: {
-                    legend: {
-                      text: {
+        <Card className={styles.tableCard}>
+          <h3>Top Shadow Delegates</h3>
+          {!governanceData ? (
+            <>
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+              <Skeleton animation='wave' height={75} />
+            </>
+          ) : (
+            <TableContainer sx={{ maxHeight: 'calc(100% - 62px)' }}>
+              <Table stickyHeader size='small' aria-label='top delegates table'>
+                <TableHead>
+                  <TableRow>
+                    <TableCell
+                      align='center'
+                      style={{
+                        textTransform: 'capitalize',
                         fontWeight: 'bold',
-                      },
-                    },
-                  },
-                }}
-                colors={{ datum: 'color' }}
-                enablePoints={false}
-                axisLeft={{
-                  legend: 'MKR delegated',
-                  legendOffset: -50,
-                  legendPosition: 'middle',
-                  format: '.0s',
-                }}
-                axisBottom={{
-                  legend: 'Time',
-                  legendOffset: 36,
-                  legendPosition: 'middle',
-                  tickValues: 'every month',
-                  format: '%b %d, %Y',
-                }}
-                isInteractive={true}
-                useMesh={true}
-              />
-            )}
-          </div>
+                      }}
+                    >
+                      Delegate
+                    </TableCell>
+                    <TableCell
+                      align='center'
+                      style={{
+                        textTransform: 'capitalize',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      <TableSortLabel
+                        active={orderBy === 'delegatorCount'}
+                        direction={
+                          orderBy === 'delegatorCount' ? order : 'desc'
+                        }
+                        onClick={handleSort('delegatorCount')}
+                      >
+                        Delegators
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell
+                      align='center'
+                      style={{
+                        textTransform: 'capitalize',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      <TableSortLabel
+                        active={orderBy === 'lockTotal'}
+                        direction={orderBy === 'lockTotal' ? order : 'desc'}
+                        onClick={handleSort('lockTotal')}
+                      >
+                        MKR Delegated
+                      </TableSortLabel>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {governanceData.topDelegates
+                    .filter((delegate) => delegate.status === 'shadow')
+                    .map((delegate, i) => (
+                      <TableRow hover key={i}>
+                        <TableCell align='left'>
+                          {delegate.name || delegate.voteDelegate}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {delegate.delegatorCount}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {parseInt(delegate.lockTotal).toLocaleString('en-US')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </Card>
         <Card className={styles.infoCard}>
-          <h3>Delegator count</h3>
-          <h3>50</h3>
+          <h3>Delegates count</h3>
+          {!governanceData ? (
+            <>
+              <Skeleton animation='wave' height={80} />
+            </>
+          ) : (
+            <div className={styles.infoCardContainer}>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {
+                    governanceData.topDelegates.filter(
+                      (delegate) => delegate.status === 'recognized'
+                    ).length
+                  }
+                </p>
+                <p className={styles.infoCardLabel}>Recognized</p>
+              </div>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {
+                    governanceData.topDelegates.filter(
+                      (delegate) => delegate.status === 'shadow'
+                    ).length
+                  }
+                </p>
+                <p className={styles.infoCardLabel}>Shadow</p>
+              </div>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {governanceData.topDelegates.length}
+                </p>
+                <p className={styles.infoCardLabel}>Total</p>
+              </div>
+            </div>
+          )}
         </Card>
         <Card className={styles.infoCard}>
-          <h3>Total MKR staked</h3>
+          <h3>MKR delegated</h3>
+          {!governanceData ? (
+            <>
+              <Skeleton animation='wave' height={80} />
+            </>
+          ) : (
+            <div className={styles.infoCardContainer}>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {kFormatter(
+                    governanceData.topDelegates
+                      .filter((delegate) => delegate.status === 'recognized')
+                      .reduce(
+                        (acum, delegate) => acum + parseInt(delegate.lockTotal),
+                        0
+                      )
+                  )}
+                </p>
+                <p className={styles.infoCardLabel}>Recognized</p>
+              </div>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {kFormatter(
+                    governanceData.topDelegates
+                      .filter((delegate) => delegate.status === 'shadow')
+                      .reduce(
+                        (acum, delegate) => acum + parseInt(delegate.lockTotal),
+                        0
+                      )
+                  )}
+                </p>
+                <p className={styles.infoCardLabel}>Shadow</p>
+              </div>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {kFormatter(
+                    governanceData.topDelegates.reduce(
+                      (acum, delegate) => acum + parseInt(delegate.lockTotal),
+                      0
+                    )
+                  )}
+                </p>
+                <p className={styles.infoCardLabel}>Total</p>
+              </div>
+            </div>
+          )}
         </Card>
         <Card className={styles.infoCard}>
-          <h3>Total MKR delegated</h3>
+          <h3>Delegators count</h3>
+          {!governanceData ? (
+            <>
+              <Skeleton animation='wave' height={80} />
+            </>
+          ) : (
+            <div className={styles.infoCardContainer}>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {governanceData.topDelegates
+                    .filter((delegate) => delegate.status === 'recognized')
+                    .reduce(
+                      (acum, delegate) => acum + delegate.delegatorCount,
+                      0
+                    )}
+                </p>
+                <p className={styles.infoCardLabel}>Recognized</p>
+              </div>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {governanceData.topDelegates
+                    .filter((delegate) => delegate.status === 'shadow')
+                    .reduce(
+                      (acum, delegate) => acum + delegate.delegatorCount,
+                      0
+                    )}
+                </p>
+                <p className={styles.infoCardLabel}>Shadow</p>
+              </div>
+              <div className={styles.thirdWidth}>
+                <p className={styles.infoCardValue}>
+                  {governanceData.topDelegates.reduce(
+                    (acum, delegate) => acum + delegate.delegatorCount,
+                    0
+                  )}
+                </p>
+                <p className={styles.infoCardLabel}>Total</p>
+              </div>
+            </div>
+          )}
         </Card>
-        <Card className={styles.infoCard}>
-          <h3>Last poll voter count</h3>
-        </Card>
-        <Card className={styles.infoCard}></Card>
         <Card className={styles.chartCard}>
           <h3>Staked and Delegated MKR</h3>
           <div className={styles.chartContainer}>
@@ -365,8 +503,64 @@ const Home: NextPage = () => {
             )}
           </div>
         </Card>
-        <div>Hello</div>
-        <div>Hello</div>
+        {/* <Card className={styles.chartCard}>
+          <h3>Total MKR Delegated</h3>
+          <div className={styles.chartContainer}>
+            {!governanceData ? (
+              <Skeleton
+                variant='rectangular'
+                height={'100%'}
+                animation='wave'
+              />
+            ) : (
+              <ResponsiveLine
+                data={[
+                  {
+                    id: 'MKR delegated',
+                    color: 'hsl(173, 74%, 39%)',
+                    data: governanceData.mkrDelegatedData.map((entry) => ({
+                      x: entry.time,
+                      y: entry.amount,
+                    })),
+                  },
+                ]}
+                xScale={{
+                  type: 'time',
+                  format: '%Y-%m-%dT%H:%M:%SZ',
+                }}
+                xFormat='time:%b %d, %Y'
+                yFormat='.3s'
+                margin={{ left: 60, bottom: 50, top: 5 }}
+                theme={{
+                  axis: {
+                    legend: {
+                      text: {
+                        fontWeight: 'bold',
+                      },
+                    },
+                  },
+                }}
+                colors={{ datum: 'color' }}
+                enablePoints={false}
+                axisLeft={{
+                  legend: 'MKR delegated',
+                  legendOffset: -50,
+                  legendPosition: 'middle',
+                  format: '.0s',
+                }}
+                axisBottom={{
+                  legend: 'Time',
+                  legendOffset: 36,
+                  legendPosition: 'middle',
+                  tickValues: 'every month',
+                  format: '%b %d, %Y',
+                }}
+                isInteractive={true}
+                useMesh={true}
+              />
+            )}
+          </div>
+        </Card> */}
       </main>
 
       <footer className={styles.footer}>Built by the GovAlpha Core Unit</footer>

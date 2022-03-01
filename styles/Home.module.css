@@ -22,13 +22,20 @@
   padding: 1.5rem 4rem;
   display: grid;
   grid-template-columns: repeat(10, 1fr);
-  grid-template-rows: 400px 200px 400px;
-  gap: 1.2rem;
+  grid-auto-rows: 140px;
+  gap: 1rem;
   background-color: #f7f8f9;
 }
 
+.tableCard {
+  grid-row: span 3;
+  grid-column: span 4;
+  padding: 0 1em 1em 1em;
+  overflow: visible;
+}
+
 .chartCard {
-  grid-row: span 1;
+  grid-row: span 3;
   grid-column: span 5;
   padding: 0 1em 1em 1em;
   overflow: visible;
@@ -38,11 +45,40 @@
   grid-row: span 1;
   grid-column: span 2;
   padding: 0 1em 1em 1em;
+  display: flex;
+  flex-direction: column;
 }
 
-.delegatesTable {
-  height: calc(100% - 62px);
-  overflow-y: scroll;
+.infoCardContainer {
+  text-align: center;
+  flex-grow: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 0.5em;
+}
+
+.halfWidth {
+  width: 50%;
+}
+
+.fullWidth {
+  width: 100%;
+}
+
+.thirdWidth {
+  width: 33%;
+}
+
+.infoCardValue {
+  font-size: 2em;
+  color: hsl(173, 74%, 39%);
+  font-weight: 500;
+  margin: 0;
+}
+
+.infoCardLabel {
+  margin: 0;
 }
 
 .chartContainer {
