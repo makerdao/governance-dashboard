@@ -3,7 +3,6 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import useSWRImmutable from 'swr/immutable'
-import { ResponsiveLine } from '@nivo/line'
 import { ResponsiveBar } from '@nivo/bar'
 import {
   Table,
@@ -22,6 +21,7 @@ import {
   getStakedMkr,
   getPollVoters,
 } from '../lib/governanceData'
+import LineChart from '../components/LineChart'
 import { kFormatter } from '../lib/helpers'
 import styles from '../styles/Home.module.css'
 
@@ -377,70 +377,21 @@ const Home: NextPage = () => {
             </div>
           )}
         </Card>
-        <Card className={styles.chartCard}>
-          <h3>Staked and Delegated MKR</h3>
-          <div className={styles.chartContainer}>
-            {!governanceData || !stakedMkrData ? (
-              <Skeleton variant='rectangular' height={'90%'} animation='wave' />
-            ) : (
-              <ResponsiveLine
-                data={[
-                  {
-                    id: 'MKR staked',
-                    color: 'hsl(173, 74%, 39%)',
-                    data: stakedMkrData.map((entry) => ({
-                      x: entry.time,
-                      y: entry.amount,
-                    })),
-                  },
-                  {
-                    id: 'MKR delegated',
-                    color: 'hsl(41, 90%, 57%)',
-                    data: governanceData.mkrDelegatedData.map((entry) => ({
-                      x: entry.time,
-                      y: entry.amount,
-                    })),
-                  },
-                ]}
-                xScale={{
-                  type: 'time',
-                  format: '%Y-%m-%dT%H:%M:%SZ',
-                }}
-                xFormat='time:%b %d, %Y'
-                yFormat='.3s'
-                margin={{ left: 60, bottom: 40, top: 5 }}
-                theme={{
-                  axis: {
-                    legend: {
-                      text: {
-                        fontWeight: 'bold',
-                      },
-                    },
-                  },
-                }}
-                colors={{ datum: 'color' }}
-                enablePoints={false}
-                // enableGridX={false}
-                // enableGridY={false}
-                axisLeft={{
-                  legend: 'MKR',
-                  legendOffset: -50,
-                  legendPosition: 'middle',
-                  format: '.2s',
-                }}
-                axisBottom={{
-                  legend: 'Time',
-                  legendOffset: 36,
-                  legendPosition: 'middle',
-                  tickValues: 'every 2 months',
-                  format: '%b %d, %Y',
-                }}
-                isInteractive={true}
-                useMesh={true}
-              />
-            )}
-          </div>
-        </Card>
+        <LineChart
+          datasetOne={stakedMkrData?.map((entry) => ({
+            x: entry.time,
+            y: entry.amount,
+          }))}
+          datasetTwo={governanceData?.mkrDelegatedData.map((entry) => ({
+            x: entry.time,
+            y: entry.amount,
+          }))}
+          datasetOneId='Staked'
+          datasetTwoId='Delegated'
+          legendX='Time'
+          legendY='MKR'
+          title='Staked and Delegated MKR'
+        />
         <Card className={styles.chartCard}>
           <h3>Average unique voters per poll per month</h3>
           <div className={styles.chartContainer}>
@@ -451,7 +402,7 @@ const Home: NextPage = () => {
                 data={pollVotersData}
                 keys={['uniqueVoters']}
                 indexBy='month'
-                margin={{ left: 60, bottom: 40, top: 5 }}
+                margin={{ left: 60, bottom: 40, top: 5, right: 50 }}
                 padding={0.2}
                 theme={{
                   axis: {
