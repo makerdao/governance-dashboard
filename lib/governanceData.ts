@@ -134,6 +134,8 @@ const getDelegations = async (): Promise<{
         voteDelegate: delegate.voteDelegate,
         lockTotal: delegations[delegations.length - 1]?.lockTotal || '0',
         delegatorCount,
+        name: '',
+        status: '',
       }
 
       return {
@@ -146,6 +148,25 @@ const getDelegations = async (): Promise<{
   const currentDelegatesBalance = rawDelegations.map(
     (delegation) => delegation.delegateBalance
   )
+
+  const delegatesMetadataRes = await fetch(
+    'https://vote.makerdao.com/api/delegates'
+  )
+  const delegatesMetadata = await delegatesMetadataRes.json()
+
+  if (delegatesMetadata.delegates) {
+    // @ts-ignore
+    delegatesMetadata.delegates.forEach((delegate) => {
+      const currentDelegate = currentDelegatesBalance.find(
+        (del) => del.voteDelegate === delegate.voteDelegateAddress
+      )
+      if (currentDelegate) {
+        currentDelegate.name = delegate.name
+        currentDelegate.status = delegate.status
+      }
+    })
+  }
+
   const delegations = rawDelegations
     .map((delegation) => delegation.delegations)
     .flat()

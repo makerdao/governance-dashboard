@@ -15,6 +15,8 @@ export type DelegateBalance = {
   voteDelegate: string
   lockTotal: string
   delegatorCount: number
+  name: string
+  status: string
 }
 
 export type MkrDelegatedData = {
