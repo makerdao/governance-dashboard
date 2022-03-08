@@ -43,8 +43,20 @@
 
 .chartTooltip {
   background: #fff;
-  border-radius: 5px;
-  padding: 1em;
+  border-radius: 2px;
+  margin: 0;
+  padding: 0.3em 0.5em;
+  box-shadow: rgba(0, 0, 0, 0.25) 0px 1px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+.tooltipCircle {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
 }
 
 .infoCard {

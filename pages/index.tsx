@@ -423,6 +423,7 @@ const Home: NextPage = () => {
             ) : (
               <ResponsiveBar
                 data={pollVotersData}
+                colors='#f4b62f'
                 keys={['uniqueVoters']}
                 indexBy='month'
                 margin={{ left: 60, bottom: 40, top: 5, right: 50 }}
@@ -436,22 +437,6 @@ const Home: NextPage = () => {
                     },
                   },
                 }}
-                defs={[
-                  {
-                    id: 'bar-fill',
-                    type: 'patternLines',
-                    background: '#f4b62f',
-                    color: '#f4b62f',
-                  },
-                ]}
-                fill={[
-                  {
-                    match: {
-                      id: 'uniqueVoters',
-                    },
-                    id: 'bar-fill',
-                  },
-                ]}
                 axisLeft={{
                   legend: 'Voters',
                   legendOffset: -50,
@@ -468,6 +453,17 @@ const Home: NextPage = () => {
                 }}
                 isInteractive={true}
                 enableLabel={false}
+                tooltip={({ data, color }) => (
+                  <div className={styles.chartTooltip}>
+                    <span
+                      className={styles.tooltipCircle}
+                      style={{ backgroundColor: color }}
+                    ></span>
+                    <span>
+                      {data.month}: <b>{data.uniqueVoters}</b> voters
+                    </span>
+                  </div>
+                )}
               />
             )}
           </div>

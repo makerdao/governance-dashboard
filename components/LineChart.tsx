@@ -48,7 +48,7 @@ const LineChart = ({
             }}
             xFormat='time:%b %d, %Y'
             yFormat='.3s'
-            margin={{ left: 60, bottom: 40, top: 5, right: 80 }}
+            margin={{ left: 67, bottom: 40, top: 5, right: 80 }}
             theme={{
               axis: {
                 legend: {
@@ -77,11 +77,15 @@ const LineChart = ({
             isInteractive={true}
             useMesh={true}
             tooltip={({ point }) => (
-              <p className={styles.chartTooltip}>
-                {point.data.xFormatted}
-                <br />
-                {point.data.yFormatted}
-              </p>
+              <div className={styles.chartTooltip}>
+                <span
+                  className={styles.tooltipCircle}
+                  style={{ backgroundColor: point.color }}
+                ></span>
+                <span>
+                  {point.data.xFormatted}: <b>{point.data.yFormatted}</b>
+                </span>
+              </div>
             )}
             legends={
               !datasetTwo.length
@@ -94,7 +98,6 @@ const LineChart = ({
                       itemHeight: 20,
                       translateX: 90,
                       symbolSize: 10,
-                      itemOpacity: 0.85,
                       symbolShape: 'circle',
                     },
                   ]
