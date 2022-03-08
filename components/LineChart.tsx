@@ -71,11 +71,18 @@ const LineChart = ({
               legend: legendX,
               legendOffset: 36,
               legendPosition: 'middle',
-              tickValues: 'every 2 months',
+              tickValues: 'every 3 months',
               format: '%b %d, %Y',
             }}
             isInteractive={true}
             useMesh={true}
+            tooltip={({ point }) => (
+              <p className={styles.chartTooltip}>
+                {point.data.xFormatted}
+                <br />
+                {point.data.yFormatted}
+              </p>
+            )}
             legends={
               !datasetTwo.length
                 ? []
