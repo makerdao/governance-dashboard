@@ -20,6 +20,7 @@ import {
   getGovernanceData,
   getStakedMkr,
   getPollVoters,
+  getMkrBalances,
 } from '../lib/governanceData'
 import LineChart from '../components/LineChart'
 import { kFormatter } from '../lib/helpers'
@@ -38,6 +39,10 @@ const Home: NextPage = () => {
   const { data: stakedMkrData } = useSWRImmutable(
     '/stakedMkrData',
     getStakedMkr
+  )
+  const { data: mkrBalancesData } = useSWRImmutable(
+    () => (governanceData && stakedMkrData ? '/mkrBalancesData' : null),
+    () => getMkrBalances(governanceData?.allDelegations, stakedMkrData)
   )
   const { data: pollVotersData } = useSWRImmutable(
     '/pollVotersData',
@@ -156,7 +161,13 @@ const Home: NextPage = () => {
                     .map((delegate, i) => (
                       <TableRow hover key={i}>
                         <TableCell align='left'>
-                          {delegate.name || delegate.voteDelegate}
+                          <a
+                            href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                            target='_blank'
+                            rel='noreferrer'
+                          >
+                            {delegate.name}
+                          </a>
                         </TableCell>
                         <TableCell align='center'>
                           {delegate.delegatorCount}
@@ -235,7 +246,15 @@ const Home: NextPage = () => {
                     .map((delegate, i) => (
                       <TableRow hover key={i}>
                         <TableCell align='left'>
-                          {delegate.name || delegate.voteDelegate}
+                          <a
+                            href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                            target='_blank'
+                            rel='noreferrer'
+                          >
+                            {delegate.voteDelegate.slice(0, 8) +
+                              '...' +
+                              delegate.voteDelegate.slice(38)}
+                          </a>
                         </TableCell>
                         <TableCell align='center'>
                           {delegate.delegatorCount}
@@ -388,7 +407,7 @@ const Home: NextPage = () => {
           }))}
           datasetOneId='Staked'
           datasetTwoId='Delegated'
-          legendX='Time'
+          legendX='Date'
           legendY='MKR'
           title='Staked and Delegated MKR'
         />
@@ -396,7 +415,11 @@ const Home: NextPage = () => {
           <h3>Average unique voters per poll per month</h3>
           <div className={styles.chartContainer}>
             {!pollVotersData ? (
-              <Skeleton variant='rectangular' height={'90%'} animation='wave' />
+              <Skeleton
+                variant='rectangular'
+                height={'100%'}
+                animation='wave'
+              />
             ) : (
               <ResponsiveBar
                 data={pollVotersData}
@@ -440,7 +463,7 @@ const Home: NextPage = () => {
                   legendOffset: 36,
                   legendPosition: 'middle',
                   tickValues: pollVotersData
-                    .filter((entry, i) => i % 3 === 0)
+                    .filter((entry, i) => i % 4 === 0)
                     .map((entry) => entry.month),
                 }}
                 isInteractive={true}
