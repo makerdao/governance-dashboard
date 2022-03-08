@@ -9,6 +9,14 @@ export type DelegationObject = {
   lockAmount: string
   blockTimestamp: Date
   lockTotal: string
+  immediateCaller: string
+}
+
+export type AllDelegationsObject = {
+  time: Date
+  amount: number
+  sender: string
+  delegate: string
 }
 
 export type DelegateBalance = {

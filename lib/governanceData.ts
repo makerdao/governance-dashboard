@@ -9,27 +9,26 @@ import {
   MkrDelegatedData,
   MkrStakedData,
   PollVotersData,
+  AllDelegationsObject,
 } from './types/delegate'
 
 export const getGovernanceData = async (): Promise<{
   topDelegates: DelegateBalance[]
   mkrDelegatedData: MkrDelegatedData[]
   totalDelegatorCount: number
+  allDelegations: AllDelegationsObject[]
 }> => {
   const delegationsRes = await getDelegations()
 
-  const {
-    currentDelegatesBalance,
-    delegations: allDelegations,
-    totalDelegatorCount,
-  } = delegationsRes
+  const { currentDelegatesBalance, delegations, totalDelegatorCount } =
+    delegationsRes
 
   const topDelegates = currentDelegatesBalance.sort(
     (a, b) => +b.lockTotal - +a.lockTotal
   )
 
   const mkrDelegatedData: MkrDelegatedData[] = []
-  allDelegations
+  delegations
     .map((delegation) => ({
       time: delegation.blockTimestamp,
       amount: +delegation.lockAmount,
@@ -44,10 +43,20 @@ export const getGovernanceData = async (): Promise<{
       return currVal + nextVal.amount
     }, 0)
 
+  const allDelegations: AllDelegationsObject[] = delegations.map(
+    (delegation) => ({
+      time: new Date(delegation.blockTimestamp),
+      amount: +delegation.lockAmount,
+      sender: delegation.fromAddress,
+      delegate: delegation.immediateCaller,
+    })
+  )
+
   return {
     topDelegates,
     mkrDelegatedData: mkrDelegatedData.slice(1),
     totalDelegatorCount,
+    allDelegations,
   }
 }
 
@@ -96,6 +105,7 @@ const getDelegations = async (): Promise<{
             blockTimestamp
             lockAmount
             lockTotal
+            immediateCaller
           }
         }
       }`
@@ -363,4 +373,45 @@ export const getPollVoters = async (): Promise<PollVotersData[]> => {
       uniqueVoters.reduce((a, b) => a + b) / uniqueVoters.length
     ),
   }))
+}
+
+export const getMkrBalances = async (
+  allDelegations: AllDelegationsObject[] | undefined,
+  mkrStakedData: MkrStakedData[] | undefined
+): Promise<void> => {
+  if (!allDelegations || !mkrStakedData) return
+  const allTxs: (MkrStakedData & { delegate?: string })[] = [
+    ...allDelegations,
+    ...mkrStakedData,
+  ].sort((a, b) => a.time.getTime() - b.time.getTime())
+
+  const userBalances: {
+    time: Date
+    balances: { sender: string; amount: number }[]
+  }[] = []
+  const balances: { sender: string; amount: number }[] = []
+
+  for (const currVal of allTxs) {
+    const user = balances.find((entry) => entry.sender === currVal.sender)
+
+    if (user) user.amount += currVal.amount
+    else balances.push({ sender: currVal.sender, amount: currVal.amount })
+
+    userBalances.push({ time: currVal.time, balances: [...balances] })
+    //   if (currVal.delegate) {
+    //     const delegate = balances.find(
+    //       (entry) => entry.sender === currVal.delegate
+    //     )
+    //     if (delegate) delegate.amount += currVal.amount
+    //     else balances.push({ sender: currVal.delegate, amount: currVal.amount })
+    //   } else {
+    //     if (user) user.amount += currVal.amount
+    //     else balances.push({ sender: currVal.sender, amount: currVal.amount })
+    //   }
+
+    //   userBalances.push({ time: currVal.time, balances })
+    // }
+  }
+
+  console.log(userBalances)
 }
