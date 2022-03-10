@@ -153,10 +153,6 @@ const Home: NextPage = () => {
             legendY='MKR'
             title='Staked and Delegated MKR'
           />
-          <BarChart
-            title='Average unique voters per poll per month'
-            data={pollVotersData}
-          />
           <LineChart
             datasetOne={mkrBalancesData?.map((entry) => ({
               x: entry.time,
@@ -176,10 +172,18 @@ const Home: NextPage = () => {
             legendY='MKR'
             title={
               selectedAddress
-                ? `Staked and Delegated MKR for user ${selectedAddress}`
+                ? `Staked and Delegated MKR for user ${
+                    selectedAddress.slice(0, 8) +
+                    '...' +
+                    selectedAddress.slice(38)
+                  }`
                 : 'Please select an address on the navbar selector to render the data'
             }
             enableArea={true}
+          />
+          <BarChart
+            title='Average unique voters per poll per month'
+            data={pollVotersData}
           />
         </main>
 

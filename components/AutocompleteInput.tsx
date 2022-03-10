@@ -28,6 +28,7 @@ const AutocompleteInput = ({
           : []
       }
       sx={{ width: 200 }}
+      size='small'
       renderInput={(params) => <TextField {...params} label='Address' />}
     />
   )
