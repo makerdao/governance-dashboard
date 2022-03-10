@@ -25,6 +25,7 @@ const theme = createTheme({
 
 const Home: NextPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
+  const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null)
 
   const { data: governanceData } = useSWRImmutable(
     '/governanceData',
@@ -56,6 +57,14 @@ const Home: NextPage = () => {
       (delegate) => delegate.status === 'shadow'
     )
 
+  const handleSelectDelegate = (
+    address: string | null,
+    delegate?: string
+  ): void => {
+    setSelectedDelegate(delegate || null)
+    setSelectedAddress(address)
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <div className={styles.container}>
@@ -81,7 +90,7 @@ const Home: NextPage = () => {
           <AutocompleteInput
             mkrBalancesData={mkrBalancesData}
             selectedAddress={selectedAddress}
-            setSelectedAddress={setSelectedAddress}
+            setSelectedAddress={handleSelectDelegate}
           />
         </nav>
 
@@ -89,8 +98,13 @@ const Home: NextPage = () => {
           <TableCard
             title='Top Recognized Delegates'
             delegates={recognizedDelegates}
+            setSelectedAddress={handleSelectDelegate}
           />
-          <TableCard title='Top Shadow Delegates' delegates={shadowDelegates} />
+          <TableCard
+            title='Top Shadow Delegates'
+            delegates={shadowDelegates}
+            setSelectedAddress={handleSelectDelegate}
+          />
           <DataCard
             title='Delegates count'
             data={
@@ -172,10 +186,13 @@ const Home: NextPage = () => {
             legendY='MKR'
             title={
               selectedAddress
-                ? `Staked and Delegated MKR for user ${
-                    selectedAddress.slice(0, 8) +
-                    '...' +
-                    selectedAddress.slice(38)
+                ? `Staked and Delegated MKR for ${
+                    selectedDelegate
+                      ? 'delegate ' + selectedDelegate
+                      : 'user ' +
+                        selectedAddress.slice(0, 8) +
+                        '...' +
+                        selectedAddress.slice(38)
                   }`
                 : 'Please select an address on the navbar selector to render the data'
             }

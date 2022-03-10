@@ -1,4 +1,4 @@
-import { useState, MouseEvent } from 'react'
+import { useState, MouseEvent, Dispatch, SetStateAction } from 'react'
 import {
   Card,
   Skeleton,
@@ -9,7 +9,9 @@ import {
   TableRow,
   TableCell,
   TableSortLabel,
+  IconButton,
 } from '@mui/material'
+import { CallMade } from '@mui/icons-material'
 import { DelegateBalance } from '../lib/types/delegate'
 
 import styles from '../styles/Home.module.css'
@@ -17,9 +19,14 @@ import styles from '../styles/Home.module.css'
 type Props = {
   title: string
   delegates: DelegateBalance[] | undefined
+  setSelectedAddress: (address: string | null, delegate?: string) => void
 }
 
-const TableCard = ({ title, delegates }: Props): JSX.Element => {
+const TableCard = ({
+  title,
+  delegates,
+  setSelectedAddress,
+}: Props): JSX.Element => {
   const [order, setOrder] = useState<'asc' | 'desc'>('desc')
   const [orderBy, setOrderBy] = useState<'lockTotal' | 'delegatorCount'>(
     'lockTotal'
@@ -106,16 +113,26 @@ const TableCard = ({ title, delegates }: Props): JSX.Element => {
               {delegates.map((delegate, i) => (
                 <TableRow hover key={i}>
                   <TableCell align='left'>
-                    <a
-                      href={`https://etherscan.io/address/${delegate.voteDelegate}`}
-                      target='_blank'
-                      rel='noreferrer'
+                    <span
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        setSelectedAddress(delegate.voteDelegate, delegate.name)
+                      }
                     >
                       {delegate.name ||
                         delegate.voteDelegate.slice(0, 8) +
                           '...' +
                           delegate.voteDelegate.slice(38)}
-                    </a>
+                    </span>
+                    <IconButton
+                      size='small'
+                      color='primary'
+                      aria-label='Etherscan delegate link'
+                      href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                      target='_blank'
+                    >
+                      <CallMade fontSize='inherit' />
+                    </IconButton>
                   </TableCell>
                   <TableCell align='center'>
                     {delegate.delegatorCount}
