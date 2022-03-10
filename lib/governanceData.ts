@@ -10,6 +10,7 @@ import {
   MkrStakedData,
   PollVotersData,
   AllDelegationsObject,
+  UserBalances,
 } from './types/delegate'
 
 export const getGovernanceData = async (): Promise<{
@@ -201,7 +202,14 @@ const getDelegations = async (): Promise<{
   return { currentDelegatesBalance, delegations, totalDelegatorCount }
 }
 
-export const getStakedMkr = async (): Promise<MkrStakedData[]> => {
+export const getStakedMkr = async (): Promise<{
+  mkrStakedData: MkrStakedData[]
+  stakeEvents: {
+    time: Date
+    sender: string
+    amount: number
+  }[]
+}> => {
   const contract = getContract(CHIEF_ADDRESS, CHIEF_ABI)
   const lockEvents = await contract.queryFilter(
     {
@@ -279,7 +287,14 @@ export const getStakedMkr = async (): Promise<MkrStakedData[]> => {
       return currVal + nextVal.amount
     }, 0)
 
-  return mkrStakedData
+  const parsedStakeEvents = stakeEvents.map((event) => ({
+    // @ts-ignore
+    time: new Date(blocksMap.get(event.blockNumber) * 1000),
+    sender: event.sender,
+    amount: event.amount,
+  }))
+
+  return { mkrStakedData, stakeEvents: parsedStakeEvents }
 }
 
 export const getPollVoters = async (): Promise<PollVotersData[]> => {
@@ -377,41 +392,64 @@ export const getPollVoters = async (): Promise<PollVotersData[]> => {
 
 export const getMkrBalances = async (
   allDelegations: AllDelegationsObject[] | undefined,
-  mkrStakedData: MkrStakedData[] | undefined
-): Promise<void> => {
-  if (!allDelegations || !mkrStakedData) return
+  stakeEvents: { time: Date; sender: string; amount: number }[] | undefined
+): Promise<UserBalances[] | void> => {
+  if (!allDelegations || !stakeEvents) return
+  console.log(
+    allDelegations.filter(
+      (del) => del.sender === '0x648d7638c9d2f8aa5a08b551295a92e4bc02d973'
+    )
+  )
   const allTxs: (MkrStakedData & { delegate?: string })[] = [
     ...allDelegations,
-    ...mkrStakedData,
+    ...stakeEvents,
   ].sort((a, b) => a.time.getTime() - b.time.getTime())
 
-  const userBalances: {
-    time: Date
-    balances: { sender: string; amount: number }[]
-  }[] = []
-  const balances: { sender: string; amount: number }[] = []
+  console.log(allDelegations)
+
+  const rawUserBalances: UserBalances[] = []
+  const balances: { sender: string; amount: number; delegated: number }[] = []
 
   for (const currVal of allTxs) {
     const user = balances.find((entry) => entry.sender === currVal.sender)
 
-    if (user) user.amount += currVal.amount
-    else balances.push({ sender: currVal.sender, amount: currVal.amount })
+    if (user) {
+      currVal.delegate
+        ? (user.delegated += currVal.amount)
+        : (user.amount += currVal.amount)
+    } else {
+      currVal.delegate
+        ? balances.push({
+            sender: currVal.sender,
+            amount: 0,
+            delegated: currVal.amount,
+          })
+        : balances.push({
+            sender: currVal.sender,
+            amount: currVal.amount,
+            delegated: 0,
+          })
+    }
 
-    userBalances.push({ time: currVal.time, balances: [...balances] })
-    //   if (currVal.delegate) {
-    //     const delegate = balances.find(
-    //       (entry) => entry.sender === currVal.delegate
-    //     )
-    //     if (delegate) delegate.amount += currVal.amount
-    //     else balances.push({ sender: currVal.delegate, amount: currVal.amount })
-    //   } else {
-    //     if (user) user.amount += currVal.amount
-    //     else balances.push({ sender: currVal.sender, amount: currVal.amount })
-    //   }
-
-    //   userBalances.push({ time: currVal.time, balances })
-    // }
+    rawUserBalances.push({
+      time: currVal.time,
+      balances: balances.map((bal) => ({
+        sender: bal.sender,
+        amount: bal.amount,
+        delegated: bal.delegated,
+      })),
+    })
   }
 
+  const userBalances = rawUserBalances.map((entry) => ({
+    time: entry.time,
+    balances: entry.balances.map((bal) => ({
+      ...bal,
+      amount: +bal.amount.toFixed(2),
+      delegated: +bal.delegated.toFixed(2),
+    })),
+  }))
+
   console.log(userBalances)
+  return userBalances
 }

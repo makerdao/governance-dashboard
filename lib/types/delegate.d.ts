@@ -43,3 +43,8 @@ export type PollVotersData = {
   month: string
   uniqueVoters: number
 }
+
+export type UserBalances = {
+  time: Date
+  balances: { sender: string; amount: number; delegated: number }[]
+}
