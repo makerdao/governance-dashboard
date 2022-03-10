@@ -27,7 +27,12 @@ import {
   getMkrBalances,
 } from '../lib/governanceData'
 import LineChart from '../components/LineChart'
-import { kFormatter } from '../lib/helpers'
+import DataCard from '../components/DataCard'
+import {
+  kFormatter,
+  reduceAndFormatDelegations,
+  reduceDelegators,
+} from '../lib/helpers'
 import styles from '../styles/Home.module.css'
 
 const theme = createTheme({
@@ -88,6 +93,18 @@ const Home: NextPage = () => {
       handleRequestSort(event, property)
     }
 
+  const recognizedDelegates =
+    governanceData &&
+    governanceData.topDelegates.filter(
+      (delegate) => delegate.status === 'recognized'
+    )
+
+  const shadowDelegates =
+    governanceData &&
+    governanceData.topDelegates.filter(
+      (delegate) => delegate.status === 'shadow'
+    )
+
   return (
     <ThemeProvider theme={theme}>
       <div className={styles.container}>
@@ -130,7 +147,7 @@ const Home: NextPage = () => {
         <main className={styles.main}>
           <Card className={styles.tableCard}>
             <h3>Top Recognized Delegates</h3>
-            {!governanceData ? (
+            {!recognizedDelegates ? (
               <>
                 <Skeleton animation='wave' height={65} />
                 <Skeleton animation='wave' height={65} />
@@ -191,29 +208,25 @@ const Home: NextPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {governanceData.topDelegates
-                      .filter((delegate) => delegate.status === 'recognized')
-                      .map((delegate, i) => (
-                        <TableRow hover key={i}>
-                          <TableCell align='left'>
-                            <a
-                              href={`https://etherscan.io/address/${delegate.voteDelegate}`}
-                              target='_blank'
-                              rel='noreferrer'
-                            >
-                              {delegate.name}
-                            </a>
-                          </TableCell>
-                          <TableCell align='center'>
-                            {delegate.delegatorCount}
-                          </TableCell>
-                          <TableCell align='center'>
-                            {parseInt(delegate.lockTotal).toLocaleString(
-                              'en-US'
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    {recognizedDelegates.map((delegate, i) => (
+                      <TableRow hover key={i}>
+                        <TableCell align='left'>
+                          <a
+                            href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                            target='_blank'
+                            rel='noreferrer'
+                          >
+                            {delegate.name}
+                          </a>
+                        </TableCell>
+                        <TableCell align='center'>
+                          {delegate.delegatorCount}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {parseInt(delegate.lockTotal).toLocaleString('en-US')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -221,7 +234,7 @@ const Home: NextPage = () => {
           </Card>
           <Card className={styles.tableCard}>
             <h3>Top Shadow Delegates</h3>
-            {!governanceData ? (
+            {!shadowDelegates ? (
               <>
                 <Skeleton animation='wave' height={65} />
                 <Skeleton animation='wave' height={65} />
@@ -282,165 +295,79 @@ const Home: NextPage = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {governanceData.topDelegates
-                      .filter((delegate) => delegate.status === 'shadow')
-                      .map((delegate, i) => (
-                        <TableRow hover key={i}>
-                          <TableCell align='left'>
-                            <a
-                              href={`https://etherscan.io/address/${delegate.voteDelegate}`}
-                              target='_blank'
-                              rel='noreferrer'
-                            >
-                              {delegate.voteDelegate.slice(0, 8) +
-                                '...' +
-                                delegate.voteDelegate.slice(38)}
-                            </a>
-                          </TableCell>
-                          <TableCell align='center'>
-                            {delegate.delegatorCount}
-                          </TableCell>
-                          <TableCell align='center'>
-                            {parseInt(delegate.lockTotal).toLocaleString(
-                              'en-US'
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                    {shadowDelegates.map((delegate, i) => (
+                      <TableRow hover key={i}>
+                        <TableCell align='left'>
+                          <a
+                            href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                            target='_blank'
+                            rel='noreferrer'
+                          >
+                            {delegate.voteDelegate.slice(0, 8) +
+                              '...' +
+                              delegate.voteDelegate.slice(38)}
+                          </a>
+                        </TableCell>
+                        <TableCell align='center'>
+                          {delegate.delegatorCount}
+                        </TableCell>
+                        <TableCell align='center'>
+                          {parseInt(delegate.lockTotal).toLocaleString('en-US')}
+                        </TableCell>
+                      </TableRow>
+                    ))}
                   </TableBody>
                 </Table>
               </TableContainer>
             )}
           </Card>
-          <Card className={styles.infoCard}>
-            <h3>Delegates count</h3>
-            {!governanceData ? (
-              <>
-                <Skeleton animation='wave' height={80} />
-              </>
-            ) : (
-              <div className={styles.infoCardContainer}>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {
-                      governanceData.topDelegates.filter(
-                        (delegate) => delegate.status === 'recognized'
-                      ).length
-                    }
-                  </p>
-                  <p className={styles.infoCardLabel}>Recognized</p>
-                </div>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {
-                      governanceData.topDelegates.filter(
-                        (delegate) => delegate.status === 'shadow'
-                      ).length
-                    }
-                  </p>
-                  <p className={styles.infoCardLabel}>Shadow</p>
-                </div>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {governanceData.topDelegates.length}
-                  </p>
-                  <p className={styles.infoCardLabel}>Total</p>
-                </div>
-              </div>
-            )}
-          </Card>
-          <Card className={styles.infoCard}>
-            <h3>MKR delegated</h3>
-            {!governanceData ? (
-              <>
-                <Skeleton animation='wave' height={80} />
-              </>
-            ) : (
-              <div className={styles.infoCardContainer}>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {kFormatter(
-                      governanceData.topDelegates
-                        .filter((delegate) => delegate.status === 'recognized')
-                        .reduce(
-                          (acum, delegate) =>
-                            acum + parseInt(delegate.lockTotal),
-                          0
-                        )
-                    )}
-                  </p>
-                  <p className={styles.infoCardLabel}>Recognized</p>
-                </div>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {kFormatter(
-                      governanceData.topDelegates
-                        .filter((delegate) => delegate.status === 'shadow')
-                        .reduce(
-                          (acum, delegate) =>
-                            acum + parseInt(delegate.lockTotal),
-                          0
-                        )
-                    )}
-                  </p>
-                  <p className={styles.infoCardLabel}>Shadow</p>
-                </div>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {kFormatter(
-                      governanceData.topDelegates.reduce(
-                        (acum, delegate) => acum + parseInt(delegate.lockTotal),
-                        0
-                      )
-                    )}
-                  </p>
-                  <p className={styles.infoCardLabel}>Total</p>
-                </div>
-              </div>
-            )}
-          </Card>
-          <Card className={styles.infoCard}>
-            <h3>Delegators count</h3>
-            {!governanceData ? (
-              <>
-                <Skeleton animation='wave' height={80} />
-              </>
-            ) : (
-              <div className={styles.infoCardContainer}>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {governanceData.topDelegates
-                      .filter((delegate) => delegate.status === 'recognized')
-                      .reduce(
-                        (acum, delegate) => acum + delegate.delegatorCount,
-                        0
-                      )}
-                  </p>
-                  <p className={styles.infoCardLabel}>Recognized</p>
-                </div>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {governanceData.topDelegates
-                      .filter((delegate) => delegate.status === 'shadow')
-                      .reduce(
-                        (acum, delegate) => acum + delegate.delegatorCount,
-                        0
-                      )}
-                  </p>
-                  <p className={styles.infoCardLabel}>Shadow</p>
-                </div>
-                <div className={styles.thirdWidth}>
-                  <p className={styles.infoCardValue}>
-                    {governanceData.topDelegates.reduce(
-                      (acum, delegate) => acum + delegate.delegatorCount,
-                      0
-                    )}
-                  </p>
-                  <p className={styles.infoCardLabel}>Total</p>
-                </div>
-              </div>
-            )}
-          </Card>
+          <DataCard
+            title='Delegates count'
+            data={
+              governanceData && [
+                { name: 'Recognized', value: recognizedDelegates?.length || 0 },
+                { name: 'Shadow', value: shadowDelegates?.length || 0 },
+                { name: 'Total', value: governanceData.topDelegates.length },
+              ]
+            }
+          />
+          <DataCard
+            title='MKR delegated'
+            data={
+              governanceData && [
+                {
+                  name: 'Recognized',
+                  value: reduceAndFormatDelegations(recognizedDelegates),
+                },
+                {
+                  name: 'Shadow',
+                  value: reduceAndFormatDelegations(shadowDelegates),
+                },
+                {
+                  name: 'Total',
+                  value: reduceAndFormatDelegations(
+                    governanceData.topDelegates
+                  ),
+                },
+              ]
+            }
+          />
+          <DataCard
+            title='Delegators count'
+            data={
+              governanceData && [
+                {
+                  name: 'Recognized',
+                  value: reduceDelegators(recognizedDelegates),
+                },
+                { name: 'Shadow', value: reduceDelegators(shadowDelegates) },
+                {
+                  name: 'Total',
+                  value: reduceDelegators(governanceData.topDelegates),
+                },
+              ]
+            }
+          />
           <LineChart
             datasetOne={stakedMkrData?.mkrStakedData.map((entry) => ({
               x: entry.time,
