@@ -10,6 +10,7 @@ import {
   getStakedMkr,
   getPollVoters,
   getMkrBalances,
+  getGroupedBalances,
 } from '../lib/governanceData'
 import AutocompleteInput from '../components/AutocompleteInput'
 import TableCard from '../components/TableCard'
@@ -27,6 +28,7 @@ const Home: NextPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null)
 
+  // Fetch data - start
   const { data: governanceData } = useSWRImmutable(
     '/governanceData',
     getGovernanceData
@@ -44,6 +46,11 @@ const Home: NextPage = () => {
     () =>
       getMkrBalances(governanceData?.allDelegations, stakedMkrData?.stakeEvents)
   )
+  const { data: groupedBalancesData } = useSWRImmutable(
+    () => (governanceData && mkrBalancesData ? '/groupedBalancesData' : null),
+    () => getGroupedBalances(governanceData?.topDelegates, mkrBalancesData)
+  )
+  // Fetch data - end
 
   const recognizedDelegates =
     governanceData &&

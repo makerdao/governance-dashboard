@@ -11,7 +11,9 @@ import {
   PollVotersData,
   AllDelegationsObject,
   UserBalances,
+  GroupedUserBalances,
 } from './types/delegate'
+import { stringify } from 'querystring'
 
 export const getGovernanceData = async (): Promise<{
   topDelegates: DelegateBalance[]
@@ -393,19 +395,13 @@ export const getPollVoters = async (): Promise<PollVotersData[]> => {
 export const getMkrBalances = async (
   allDelegations: AllDelegationsObject[] | undefined,
   stakeEvents: { time: Date; sender: string; amount: number }[] | undefined
-): Promise<UserBalances[] | void> => {
-  if (!allDelegations || !stakeEvents) return
-  console.log(
-    allDelegations.filter(
-      (del) => del.sender === '0x648d7638c9d2f8aa5a08b551295a92e4bc02d973'
-    )
-  )
+): Promise<UserBalances[] | undefined> => {
+  if (!allDelegations || !stakeEvents) return undefined
+
   const allTxs: (MkrStakedData & { delegate?: string })[] = [
     ...allDelegations,
     ...stakeEvents,
   ].sort((a, b) => a.time.getTime() - b.time.getTime())
-
-  console.log(allDelegations)
 
   const rawUserBalances: UserBalances[] = []
   const balances: { sender: string; amount: number; delegated: number }[] = []
@@ -450,6 +446,50 @@ export const getMkrBalances = async (
     })),
   }))
 
-  console.log(userBalances)
   return userBalances
+}
+
+export const getGroupedBalances = async (
+  delegates: DelegateBalance[] | undefined,
+  mkrBalancesData: UserBalances[] | undefined
+): Promise<GroupedUserBalances | undefined> => {
+  if (!delegates || !mkrBalancesData) return undefined
+
+  const balancesArr = mkrBalancesData[
+    mkrBalancesData.length - 1
+  ].balances.filter((bal) => bal.amount >= 0.01)
+
+  const recognizedDelegatesMap = new Map<string, string>()
+
+  const recognizedDelegates = delegates
+    .filter((del) => del.status === 'recognized')
+    .map((del) => {
+      recognizedDelegatesMap.set(del.voteDelegate, del.name)
+      return del.voteDelegate
+    })
+
+  const shadowDelegates = delegates
+    .filter((del) => del.status === 'shadow')
+    .map((del) => del.voteDelegate)
+
+  const groupedUserBalances: GroupedUserBalances = {
+    recognizedDelegates: [],
+    shadowDelegates: [],
+    users: [],
+  }
+
+  for (const { sender, amount } of balancesArr) {
+    const formattedBalance = { address: sender, amount }
+
+    if (recognizedDelegates.includes(sender))
+      groupedUserBalances.recognizedDelegates.push({
+        ...formattedBalance,
+        name: recognizedDelegatesMap.get(sender) || '',
+      })
+    else if (shadowDelegates.includes(sender))
+      groupedUserBalances.shadowDelegates.push(formattedBalance)
+    else groupedUserBalances.users.push(formattedBalance)
+  }
+
+  return groupedUserBalances
 }
