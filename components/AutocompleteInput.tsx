@@ -6,7 +6,7 @@ import { UserBalances } from '../lib/types/delegate'
 type Props = {
   mkrBalancesData: void | UserBalances[] | undefined
   selectedAddress: string | null
-  setSelectedAddress: Dispatch<SetStateAction<string | null>>
+  setSelectedAddress: (address: string | null, delegate?: string) => void
 }
 
 const AutocompleteInput = ({
@@ -28,8 +28,12 @@ const AutocompleteInput = ({
           : []
       }
       sx={{ width: 200 }}
+      clearOnEscape
       size='small'
       renderInput={(params) => <TextField {...params} label='Address' />}
+      renderOption={(props, option) => (
+        <li {...props}>{option.slice(0, 12) + '...' + option.slice(38)}</li>
+      )}
     />
   )
 }
