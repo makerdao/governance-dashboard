@@ -7,7 +7,7 @@
   flex: 1;
   padding: 1.5rem 4rem;
   border-bottom: 1px solid #eaeaea;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
 }
 

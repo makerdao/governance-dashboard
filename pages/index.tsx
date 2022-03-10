@@ -14,6 +14,10 @@ import {
   TableSortLabel,
   Skeleton,
   Card,
+  Autocomplete,
+  TextField,
+  createTheme,
+  ThemeProvider,
 } from '@mui/material'
 
 import {
@@ -26,11 +30,16 @@ import LineChart from '../components/LineChart'
 import { kFormatter } from '../lib/helpers'
 import styles from '../styles/Home.module.css'
 
+const theme = createTheme({
+  palette: { primary: { main: 'hsl(173, 74%, 39%)' } },
+})
+
 const Home: NextPage = () => {
   const [order, setOrder] = useState<'asc' | 'desc'>('desc')
   const [orderBy, setOrderBy] = useState<'lockTotal' | 'delegatorCount'>(
     'lockTotal'
   )
+  const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
 
   const { data: governanceData, error } = useSWRImmutable(
     '/governanceData',
@@ -42,7 +51,8 @@ const Home: NextPage = () => {
   )
   const { data: mkrBalancesData } = useSWRImmutable(
     () => (governanceData && stakedMkrData ? '/mkrBalancesData' : null),
-    () => getMkrBalances(governanceData?.allDelegations, stakedMkrData)
+    () =>
+      getMkrBalances(governanceData?.allDelegations, stakedMkrData?.stakeEvents)
   )
   const { data: pollVotersData } = useSWRImmutable(
     '/pollVotersData',
@@ -79,457 +89,461 @@ const Home: NextPage = () => {
     }
 
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>MakerDAO Governance Dashboard</title>
-        <meta
-          name='description'
-          content='A dashboard containing metrics about MakerDAO governance and delegation'
-        />
-        <link rel='icon' href='/favicon.ico' />
-      </Head>
+    <ThemeProvider theme={theme}>
+      <div className={styles.container}>
+        <Head>
+          <title>MakerDAO Governance Dashboard</title>
+          <meta
+            name='description'
+            content='A dashboard containing metrics about MakerDAO governance and delegation'
+          />
+          <link rel='icon' href='/favicon.ico' />
+        </Head>
 
-      <nav className={styles.nav}>
-        <div className={styles.logoContainer}>
-          <Image src='/makerlogo.png' alt='Maker logo' width={42} height={30} />
-          MakerDAO Governance Metrics
-        </div>
-      </nav>
+        <nav className={styles.nav}>
+          <div className={styles.logoContainer}>
+            <Image
+              src='/makerlogo.png'
+              alt='Maker logo'
+              width={42}
+              height={30}
+            />
+            MakerDAO Governance Metrics
+          </div>
+          <Autocomplete
+            value={selectedAddress}
+            onChange={(event: any, newAddress: string | null) => {
+              setSelectedAddress(newAddress)
+            }}
+            options={
+              mkrBalancesData
+                ? mkrBalancesData[mkrBalancesData.length - 1].balances.map(
+                    (bal) => bal.sender
+                  )
+                : []
+            }
+            sx={{ width: 200 }}
+            renderInput={(params) => <TextField {...params} label='Address' />}
+          />
+        </nav>
 
-      <main className={styles.main}>
-        <Card className={styles.tableCard}>
-          <h3>Top Recognized Delegates</h3>
-          {!governanceData ? (
-            <>
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-            </>
-          ) : (
-            <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
-              <Table stickyHeader size='small' aria-label='top delegates table'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      align='center'
-                      style={{
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Delegate
-                    </TableCell>
-                    <TableCell
-                      align='center'
-                      style={{
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      <TableSortLabel
-                        active={orderBy === 'delegatorCount'}
-                        direction={
-                          orderBy === 'delegatorCount' ? order : 'desc'
-                        }
-                        onClick={handleSort('delegatorCount')}
+        <main className={styles.main}>
+          <Card className={styles.tableCard}>
+            <h3>Top Recognized Delegates</h3>
+            {!governanceData ? (
+              <>
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+              </>
+            ) : (
+              <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
+                <Table
+                  stickyHeader
+                  size='small'
+                  aria-label='top delegates table'
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        align='center'
+                        style={{
+                          textTransform: 'capitalize',
+                          fontWeight: 'bold',
+                        }}
                       >
-                        Delegators
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell
-                      align='center'
-                      style={{
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      <TableSortLabel
-                        active={orderBy === 'lockTotal'}
-                        direction={orderBy === 'lockTotal' ? order : 'desc'}
-                        onClick={handleSort('lockTotal')}
+                        Delegate
+                      </TableCell>
+                      <TableCell
+                        align='center'
+                        style={{
+                          textTransform: 'capitalize',
+                          fontWeight: 'bold',
+                        }}
                       >
-                        MKR Delegated
-                      </TableSortLabel>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {governanceData.topDelegates
-                    .filter((delegate) => delegate.status === 'recognized')
-                    .map((delegate, i) => (
-                      <TableRow hover key={i}>
-                        <TableCell align='left'>
-                          <a
-                            href={`https://etherscan.io/address/${delegate.voteDelegate}`}
-                            target='_blank'
-                            rel='noreferrer'
-                          >
-                            {delegate.name}
-                          </a>
-                        </TableCell>
-                        <TableCell align='center'>
-                          {delegate.delegatorCount}
-                        </TableCell>
-                        <TableCell align='center'>
-                          {parseInt(delegate.lockTotal).toLocaleString('en-US')}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Card>
-        <Card className={styles.tableCard}>
-          <h3>Top Shadow Delegates</h3>
-          {!governanceData ? (
-            <>
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-              <Skeleton animation='wave' height={65} />
-            </>
-          ) : (
-            <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
-              <Table stickyHeader size='small' aria-label='top delegates table'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell
-                      align='center'
-                      style={{
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      Delegate
-                    </TableCell>
-                    <TableCell
-                      align='center'
-                      style={{
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      <TableSortLabel
-                        active={orderBy === 'delegatorCount'}
-                        direction={
-                          orderBy === 'delegatorCount' ? order : 'desc'
-                        }
-                        onClick={handleSort('delegatorCount')}
+                        <TableSortLabel
+                          active={orderBy === 'delegatorCount'}
+                          direction={
+                            orderBy === 'delegatorCount' ? order : 'desc'
+                          }
+                          onClick={handleSort('delegatorCount')}
+                        >
+                          Delegators
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell
+                        align='center'
+                        style={{
+                          textTransform: 'capitalize',
+                          fontWeight: 'bold',
+                        }}
                       >
-                        Delegators
-                      </TableSortLabel>
-                    </TableCell>
-                    <TableCell
-                      align='center'
-                      style={{
-                        textTransform: 'capitalize',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      <TableSortLabel
-                        active={orderBy === 'lockTotal'}
-                        direction={orderBy === 'lockTotal' ? order : 'desc'}
-                        onClick={handleSort('lockTotal')}
+                        <TableSortLabel
+                          active={orderBy === 'lockTotal'}
+                          direction={orderBy === 'lockTotal' ? order : 'desc'}
+                          onClick={handleSort('lockTotal')}
+                        >
+                          MKR Delegated
+                        </TableSortLabel>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {governanceData.topDelegates
+                      .filter((delegate) => delegate.status === 'recognized')
+                      .map((delegate, i) => (
+                        <TableRow hover key={i}>
+                          <TableCell align='left'>
+                            <a
+                              href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                              target='_blank'
+                              rel='noreferrer'
+                            >
+                              {delegate.name}
+                            </a>
+                          </TableCell>
+                          <TableCell align='center'>
+                            {delegate.delegatorCount}
+                          </TableCell>
+                          <TableCell align='center'>
+                            {parseInt(delegate.lockTotal).toLocaleString(
+                              'en-US'
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Card>
+          <Card className={styles.tableCard}>
+            <h3>Top Shadow Delegates</h3>
+            {!governanceData ? (
+              <>
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+                <Skeleton animation='wave' height={65} />
+              </>
+            ) : (
+              <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
+                <Table
+                  stickyHeader
+                  size='small'
+                  aria-label='top delegates table'
+                >
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        align='center'
+                        style={{
+                          textTransform: 'capitalize',
+                          fontWeight: 'bold',
+                        }}
                       >
-                        MKR Delegated
-                      </TableSortLabel>
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {governanceData.topDelegates
-                    .filter((delegate) => delegate.status === 'shadow')
-                    .map((delegate, i) => (
-                      <TableRow hover key={i}>
-                        <TableCell align='left'>
-                          <a
-                            href={`https://etherscan.io/address/${delegate.voteDelegate}`}
-                            target='_blank'
-                            rel='noreferrer'
-                          >
-                            {delegate.voteDelegate.slice(0, 8) +
-                              '...' +
-                              delegate.voteDelegate.slice(38)}
-                          </a>
-                        </TableCell>
-                        <TableCell align='center'>
-                          {delegate.delegatorCount}
-                        </TableCell>
-                        <TableCell align='center'>
-                          {parseInt(delegate.lockTotal).toLocaleString('en-US')}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Card>
-        <Card className={styles.infoCard}>
-          <h3>Delegates count</h3>
-          {!governanceData ? (
-            <>
-              <Skeleton animation='wave' height={80} />
-            </>
-          ) : (
-            <div className={styles.infoCardContainer}>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {
-                    governanceData.topDelegates.filter(
-                      (delegate) => delegate.status === 'recognized'
-                    ).length
-                  }
-                </p>
-                <p className={styles.infoCardLabel}>Recognized</p>
+                        Delegate
+                      </TableCell>
+                      <TableCell
+                        align='center'
+                        style={{
+                          textTransform: 'capitalize',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        <TableSortLabel
+                          active={orderBy === 'delegatorCount'}
+                          direction={
+                            orderBy === 'delegatorCount' ? order : 'desc'
+                          }
+                          onClick={handleSort('delegatorCount')}
+                        >
+                          Delegators
+                        </TableSortLabel>
+                      </TableCell>
+                      <TableCell
+                        align='center'
+                        style={{
+                          textTransform: 'capitalize',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        <TableSortLabel
+                          active={orderBy === 'lockTotal'}
+                          direction={orderBy === 'lockTotal' ? order : 'desc'}
+                          onClick={handleSort('lockTotal')}
+                        >
+                          MKR Delegated
+                        </TableSortLabel>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {governanceData.topDelegates
+                      .filter((delegate) => delegate.status === 'shadow')
+                      .map((delegate, i) => (
+                        <TableRow hover key={i}>
+                          <TableCell align='left'>
+                            <a
+                              href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                              target='_blank'
+                              rel='noreferrer'
+                            >
+                              {delegate.voteDelegate.slice(0, 8) +
+                                '...' +
+                                delegate.voteDelegate.slice(38)}
+                            </a>
+                          </TableCell>
+                          <TableCell align='center'>
+                            {delegate.delegatorCount}
+                          </TableCell>
+                          <TableCell align='center'>
+                            {parseInt(delegate.lockTotal).toLocaleString(
+                              'en-US'
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            )}
+          </Card>
+          <Card className={styles.infoCard}>
+            <h3>Delegates count</h3>
+            {!governanceData ? (
+              <>
+                <Skeleton animation='wave' height={80} />
+              </>
+            ) : (
+              <div className={styles.infoCardContainer}>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {
+                      governanceData.topDelegates.filter(
+                        (delegate) => delegate.status === 'recognized'
+                      ).length
+                    }
+                  </p>
+                  <p className={styles.infoCardLabel}>Recognized</p>
+                </div>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {
+                      governanceData.topDelegates.filter(
+                        (delegate) => delegate.status === 'shadow'
+                      ).length
+                    }
+                  </p>
+                  <p className={styles.infoCardLabel}>Shadow</p>
+                </div>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {governanceData.topDelegates.length}
+                  </p>
+                  <p className={styles.infoCardLabel}>Total</p>
+                </div>
               </div>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {
-                    governanceData.topDelegates.filter(
-                      (delegate) => delegate.status === 'shadow'
-                    ).length
-                  }
-                </p>
-                <p className={styles.infoCardLabel}>Shadow</p>
+            )}
+          </Card>
+          <Card className={styles.infoCard}>
+            <h3>MKR delegated</h3>
+            {!governanceData ? (
+              <>
+                <Skeleton animation='wave' height={80} />
+              </>
+            ) : (
+              <div className={styles.infoCardContainer}>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {kFormatter(
+                      governanceData.topDelegates
+                        .filter((delegate) => delegate.status === 'recognized')
+                        .reduce(
+                          (acum, delegate) =>
+                            acum + parseInt(delegate.lockTotal),
+                          0
+                        )
+                    )}
+                  </p>
+                  <p className={styles.infoCardLabel}>Recognized</p>
+                </div>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {kFormatter(
+                      governanceData.topDelegates
+                        .filter((delegate) => delegate.status === 'shadow')
+                        .reduce(
+                          (acum, delegate) =>
+                            acum + parseInt(delegate.lockTotal),
+                          0
+                        )
+                    )}
+                  </p>
+                  <p className={styles.infoCardLabel}>Shadow</p>
+                </div>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {kFormatter(
+                      governanceData.topDelegates.reduce(
+                        (acum, delegate) => acum + parseInt(delegate.lockTotal),
+                        0
+                      )
+                    )}
+                  </p>
+                  <p className={styles.infoCardLabel}>Total</p>
+                </div>
               </div>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {governanceData.topDelegates.length}
-                </p>
-                <p className={styles.infoCardLabel}>Total</p>
-              </div>
-            </div>
-          )}
-        </Card>
-        <Card className={styles.infoCard}>
-          <h3>MKR delegated</h3>
-          {!governanceData ? (
-            <>
-              <Skeleton animation='wave' height={80} />
-            </>
-          ) : (
-            <div className={styles.infoCardContainer}>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {kFormatter(
-                    governanceData.topDelegates
+            )}
+          </Card>
+          <Card className={styles.infoCard}>
+            <h3>Delegators count</h3>
+            {!governanceData ? (
+              <>
+                <Skeleton animation='wave' height={80} />
+              </>
+            ) : (
+              <div className={styles.infoCardContainer}>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {governanceData.topDelegates
                       .filter((delegate) => delegate.status === 'recognized')
                       .reduce(
-                        (acum, delegate) => acum + parseInt(delegate.lockTotal),
+                        (acum, delegate) => acum + delegate.delegatorCount,
                         0
-                      )
-                  )}
-                </p>
-                <p className={styles.infoCardLabel}>Recognized</p>
-              </div>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {kFormatter(
-                    governanceData.topDelegates
+                      )}
+                  </p>
+                  <p className={styles.infoCardLabel}>Recognized</p>
+                </div>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {governanceData.topDelegates
                       .filter((delegate) => delegate.status === 'shadow')
                       .reduce(
-                        (acum, delegate) => acum + parseInt(delegate.lockTotal),
+                        (acum, delegate) => acum + delegate.delegatorCount,
                         0
-                      )
-                  )}
-                </p>
-                <p className={styles.infoCardLabel}>Shadow</p>
-              </div>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {kFormatter(
-                    governanceData.topDelegates.reduce(
-                      (acum, delegate) => acum + parseInt(delegate.lockTotal),
-                      0
-                    )
-                  )}
-                </p>
-                <p className={styles.infoCardLabel}>Total</p>
-              </div>
-            </div>
-          )}
-        </Card>
-        <Card className={styles.infoCard}>
-          <h3>Delegators count</h3>
-          {!governanceData ? (
-            <>
-              <Skeleton animation='wave' height={80} />
-            </>
-          ) : (
-            <div className={styles.infoCardContainer}>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {governanceData.topDelegates
-                    .filter((delegate) => delegate.status === 'recognized')
-                    .reduce(
+                      )}
+                  </p>
+                  <p className={styles.infoCardLabel}>Shadow</p>
+                </div>
+                <div className={styles.thirdWidth}>
+                  <p className={styles.infoCardValue}>
+                    {governanceData.topDelegates.reduce(
                       (acum, delegate) => acum + delegate.delegatorCount,
                       0
                     )}
-                </p>
-                <p className={styles.infoCardLabel}>Recognized</p>
+                  </p>
+                  <p className={styles.infoCardLabel}>Total</p>
+                </div>
               </div>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {governanceData.topDelegates
-                    .filter((delegate) => delegate.status === 'shadow')
-                    .reduce(
-                      (acum, delegate) => acum + delegate.delegatorCount,
-                      0
-                    )}
-                </p>
-                <p className={styles.infoCardLabel}>Shadow</p>
-              </div>
-              <div className={styles.thirdWidth}>
-                <p className={styles.infoCardValue}>
-                  {governanceData.topDelegates.reduce(
-                    (acum, delegate) => acum + delegate.delegatorCount,
-                    0
+            )}
+          </Card>
+          <LineChart
+            datasetOne={stakedMkrData?.mkrStakedData.map((entry) => ({
+              x: entry.time,
+              y: entry.amount,
+            }))}
+            datasetTwo={governanceData?.mkrDelegatedData.map((entry) => ({
+              x: entry.time,
+              y: entry.amount,
+            }))}
+            datasetOneId='Staked'
+            datasetTwoId='Delegated'
+            legendX='Date'
+            legendY='MKR'
+            title='Staked and Delegated MKR'
+          />
+          <Card className={styles.chartCard}>
+            <h3>Average unique voters per poll per month</h3>
+            <div className={styles.chartContainer}>
+              {!pollVotersData ? (
+                <Skeleton
+                  variant='rectangular'
+                  height={'100%'}
+                  animation='wave'
+                />
+              ) : (
+                <ResponsiveBar
+                  data={pollVotersData}
+                  colors='#f4b62f'
+                  keys={['uniqueVoters']}
+                  indexBy='month'
+                  margin={{ left: 60, bottom: 40, top: 5, right: 50 }}
+                  padding={0.2}
+                  theme={{
+                    axis: {
+                      legend: {
+                        text: {
+                          fontWeight: 'bold',
+                        },
+                      },
+                    },
+                  }}
+                  axisLeft={{
+                    legend: 'Voters',
+                    legendOffset: -50,
+                    legendPosition: 'middle',
+                    format: '.2s',
+                  }}
+                  axisBottom={{
+                    legend: 'Month',
+                    legendOffset: 36,
+                    legendPosition: 'middle',
+                    tickValues: pollVotersData
+                      .filter((entry, i) => i % 4 === 0)
+                      .map((entry) => entry.month),
+                  }}
+                  isInteractive={true}
+                  enableLabel={false}
+                  tooltip={({ data, color }) => (
+                    <div className={styles.chartTooltip}>
+                      <span
+                        className={styles.tooltipCircle}
+                        style={{ backgroundColor: color }}
+                      ></span>
+                      <span>
+                        {data.month}: <b>{data.uniqueVoters}</b> voters
+                      </span>
+                    </div>
                   )}
-                </p>
-                <p className={styles.infoCardLabel}>Total</p>
-              </div>
+                />
+              )}
             </div>
-          )}
-        </Card>
-        <LineChart
-          datasetOne={stakedMkrData?.map((entry) => ({
-            x: entry.time,
-            y: entry.amount,
-          }))}
-          datasetTwo={governanceData?.mkrDelegatedData.map((entry) => ({
-            x: entry.time,
-            y: entry.amount,
-          }))}
-          datasetOneId='Staked'
-          datasetTwoId='Delegated'
-          legendX='Date'
-          legendY='MKR'
-          title='Staked and Delegated MKR'
-        />
-        <Card className={styles.chartCard}>
-          <h3>Average unique voters per poll per month</h3>
-          <div className={styles.chartContainer}>
-            {!pollVotersData ? (
-              <Skeleton
-                variant='rectangular'
-                height={'100%'}
-                animation='wave'
-              />
-            ) : (
-              <ResponsiveBar
-                data={pollVotersData}
-                colors='#f4b62f'
-                keys={['uniqueVoters']}
-                indexBy='month'
-                margin={{ left: 60, bottom: 40, top: 5, right: 50 }}
-                padding={0.2}
-                theme={{
-                  axis: {
-                    legend: {
-                      text: {
-                        fontWeight: 'bold',
-                      },
-                    },
-                  },
-                }}
-                axisLeft={{
-                  legend: 'Voters',
-                  legendOffset: -50,
-                  legendPosition: 'middle',
-                  format: '.2s',
-                }}
-                axisBottom={{
-                  legend: 'Month',
-                  legendOffset: 36,
-                  legendPosition: 'middle',
-                  tickValues: pollVotersData
-                    .filter((entry, i) => i % 4 === 0)
-                    .map((entry) => entry.month),
-                }}
-                isInteractive={true}
-                enableLabel={false}
-                tooltip={({ data, color }) => (
-                  <div className={styles.chartTooltip}>
-                    <span
-                      className={styles.tooltipCircle}
-                      style={{ backgroundColor: color }}
-                    ></span>
-                    <span>
-                      {data.month}: <b>{data.uniqueVoters}</b> voters
-                    </span>
-                  </div>
-                )}
-              />
-            )}
-          </div>
-        </Card>
-        {/* <Card className={styles.chartCard}>
-          <h3>Total MKR Delegated</h3>
-          <div className={styles.chartContainer}>
-            {!governanceData ? (
-              <Skeleton
-                variant='rectangular'
-                height={'100%'}
-                animation='wave'
-              />
-            ) : (
-              <ResponsiveLine
-                data={[
-                  {
-                    id: 'MKR delegated',
-                    color: 'hsl(173, 74%, 39%)',
-                    data: governanceData.mkrDelegatedData.map((entry) => ({
-                      x: entry.time,
-                      y: entry.amount,
-                    })),
-                  },
-                ]}
-                xScale={{
-                  type: 'time',
-                  format: '%Y-%m-%dT%H:%M:%SZ',
-                }}
-                xFormat='time:%b %d, %Y'
-                yFormat='.3s'
-                margin={{ left: 60, bottom: 50, top: 5 }}
-                theme={{
-                  axis: {
-                    legend: {
-                      text: {
-                        fontWeight: 'bold',
-                      },
-                    },
-                  },
-                }}
-                colors={{ datum: 'color' }}
-                enablePoints={false}
-                axisLeft={{
-                  legend: 'MKR delegated',
-                  legendOffset: -50,
-                  legendPosition: 'middle',
-                  format: '.0s',
-                }}
-                axisBottom={{
-                  legend: 'Time',
-                  legendOffset: 36,
-                  legendPosition: 'middle',
-                  tickValues: 'every month',
-                  format: '%b %d, %Y',
-                }}
-                isInteractive={true}
-                useMesh={true}
-              />
-            )}
-          </div>
-        </Card> */}
-      </main>
+          </Card>
+          <LineChart
+            datasetOne={mkrBalancesData?.map((entry) => ({
+              x: entry.time,
+              y:
+                entry.balances.find((bal) => bal.sender === selectedAddress)
+                  ?.amount || 0,
+            }))}
+            datasetTwo={mkrBalancesData?.map((entry) => ({
+              x: entry.time,
+              y:
+                entry.balances.find((bal) => bal.sender === selectedAddress)
+                  ?.delegated || 0,
+            }))}
+            datasetOneId='Staked'
+            datasetTwoId='Delegated'
+            legendX='Date'
+            legendY='MKR'
+            title={
+              selectedAddress
+                ? `Staked and Delegated MKR for user ${selectedAddress}`
+                : 'Please select an address on the navbar selector to render the data'
+            }
+            enableArea={true}
+          />
+        </main>
 
-      <footer className={styles.footer}>Built by the GovAlpha Core Unit</footer>
-    </div>
+        <footer className={styles.footer}>
+          Built by the GovAlpha Core Unit
+        </footer>
+      </div>
+    </ThemeProvider>
   )
 }
 
