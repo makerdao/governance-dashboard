@@ -2,6 +2,7 @@ import { Datum, ResponsiveLine } from '@nivo/line'
 import { Card, Skeleton } from '@mui/material'
 
 import styles from '../styles/Home.module.css'
+import { kFormatter, kFormatterInt } from '../lib/helpers'
 
 type Props = {
   datasetOne: Datum[] | undefined
@@ -11,6 +12,7 @@ type Props = {
   legendX: string
   legendY: string
   title: string
+  enableArea?: boolean
 }
 
 const LineChart = ({
@@ -21,6 +23,7 @@ const LineChart = ({
   legendX,
   legendY,
   title,
+  enableArea = false,
 }: Props): JSX.Element => {
   return (
     <Card className={styles.chartCard}>
@@ -39,7 +42,7 @@ const LineChart = ({
               {
                 id: datasetTwoId,
                 color: 'hsl(41, 90%, 57%)',
-                data: datasetTwo,
+                data: datasetTwo || [],
               },
             ]}
             xScale={{
@@ -47,7 +50,7 @@ const LineChart = ({
               format: '%Y-%m-%dT%H:%M:%SZ',
             }}
             xFormat='time:%b %d, %Y'
-            yFormat='.3s'
+            yFormat={(value) => kFormatter(+value).toString()}
             margin={{ left: 67, bottom: 40, top: 5, right: 80 }}
             theme={{
               axis: {
@@ -65,7 +68,7 @@ const LineChart = ({
               legend: legendY,
               legendOffset: -50,
               legendPosition: 'middle',
-              format: '.2s',
+              format: (value) => kFormatterInt(value),
             }}
             axisBottom={{
               legend: legendX,
@@ -102,6 +105,7 @@ const LineChart = ({
                     },
                   ]
             }
+            enableArea={enableArea}
           />
         )}
       </div>
