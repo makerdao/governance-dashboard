@@ -50,7 +50,7 @@ const LineChart = ({
               format: '%Y-%m-%dT%H:%M:%SZ',
             }}
             xFormat='time:%b %d, %Y'
-            yFormat={(value) => kFormatter(+value).toString()}
+            yFormat={(value) => kFormatter(+value, 2).toString()}
             margin={{ left: 67, bottom: 40, top: 5, right: 80 }}
             theme={{
               axis: {

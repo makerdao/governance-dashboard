@@ -1,4 +1,4 @@
-import { useState, MouseEvent, Dispatch, SetStateAction } from 'react'
+import { useState, MouseEvent } from 'react'
 import {
   Card,
   Skeleton,
@@ -138,7 +138,9 @@ const TableCard = ({
                     {delegate.delegatorCount}
                   </TableCell>
                   <TableCell align='center'>
-                    {parseInt(delegate.lockTotal).toLocaleString('en-US')}
+                    {(+parseFloat(delegate.lockTotal).toFixed(
+                      2
+                    )).toLocaleString('en-US')}
                   </TableCell>
                 </TableRow>
               ))}
