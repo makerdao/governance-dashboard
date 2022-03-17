@@ -19,7 +19,7 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
         ) : (
           <ResponsiveBar
             data={data}
-            colors='#f4b62f'
+            colors='hsl(41, 90%, 57%)'
             keys={['uniqueVoters']}
             indexBy='month'
             margin={{ left: 60, bottom: 40, top: 5, right: 50 }}

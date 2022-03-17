@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from 'react'
 import { Autocomplete, TextField } from '@mui/material'
 
 import { UserBalances } from '../lib/types/delegate'
