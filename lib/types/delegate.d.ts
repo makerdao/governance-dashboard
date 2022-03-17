@@ -49,6 +49,11 @@ export type UserBalances = {
   balances: { sender: string; amount: number; delegated: number }[]
 }
 
+export type DelegateBalances = {
+  time: Date
+  balances: { name: string; address: string; amount: number }[]
+}
+
 export type GroupedUserBalances = {
   recognizedDelegates: {
     address: string

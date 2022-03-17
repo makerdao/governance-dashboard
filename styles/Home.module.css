@@ -113,10 +113,7 @@
 }
 
 .footer a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
+  color: hsl(173, 74%, 39%);
 }
 
 .title a {
