@@ -11,9 +11,9 @@ import {
   PollVotersData,
   AllDelegationsObject,
   UserBalances,
+  DelegateBalances,
   GroupedUserBalances,
 } from './types/delegate'
-import { stringify } from 'querystring'
 
 export const getGovernanceData = async (): Promise<{
   topDelegates: DelegateBalance[]
@@ -163,18 +163,19 @@ const getDelegations = async (): Promise<{
   )
 
   const delegatesMetadataRes = await fetch(
-    'https://vote.makerdao.com/api/delegates'
+    'https://vote.makerdao.com/api/delegates/names'
   )
   const delegatesMetadata = await delegatesMetadataRes.json()
 
-  if (delegatesMetadata.delegates) {
+  if (delegatesMetadata && delegatesMetadata.length) {
     // @ts-ignore
-    delegatesMetadata.delegates.forEach((delegate) => {
+    delegatesMetadata.forEach((delegate) => {
       const currentDelegate = currentDelegatesBalance.find(
         (del) => del.voteDelegate === delegate.voteDelegateAddress
       )
       if (currentDelegate) {
-        currentDelegate.name = delegate.name
+        currentDelegate.name =
+          delegate.status === 'recognized' ? delegate.name : ''
         currentDelegate.status = delegate.status
       }
     })
@@ -455,9 +456,9 @@ export const getGroupedBalances = async (
 ): Promise<GroupedUserBalances | undefined> => {
   if (!delegates || !mkrBalancesData) return undefined
 
-  const balancesArr = mkrBalancesData[
-    mkrBalancesData.length - 1
-  ].balances.filter((bal) => bal.amount >= 0.01)
+  const balancesArr = mkrBalancesData[mkrBalancesData.length - 1].balances
+    .filter((bal) => bal.amount >= 0.01)
+    .sort((a, b) => b.amount - a.amount)
 
   const recognizedDelegatesMap = new Map<string, string>()
 
@@ -492,4 +493,41 @@ export const getGroupedBalances = async (
   }
 
   return groupedUserBalances
+}
+
+export const getDelegatesBalances = async (
+  allDelegations: AllDelegationsObject[] | undefined,
+  topDelegates: DelegateBalance[] | undefined
+): Promise<DelegateBalances[] | undefined> => {
+  if (!allDelegations || !topDelegates) return undefined
+
+  allDelegations.sort((a, b) => a.time.getTime() - b.time.getTime())
+
+  const delegateInitialBalances: DelegateBalances['balances'] =
+    topDelegates.map((del) => ({
+      name: del.name,
+      address: del.voteDelegate,
+      amount: 0,
+    }))
+
+  const delegateBalances: DelegateBalances[] = []
+
+  for (const delegation of allDelegations) {
+    const delegateBal = delegateInitialBalances.find(
+      (del) => del.address === delegation.delegate
+    )
+    if (!delegateBal) return undefined
+
+    delegateBal.amount += delegation.amount
+
+    delegateBalances.push({
+      time: delegation.time,
+      balances: delegateInitialBalances.map((del) => ({
+        name: del.name,
+        address: del.address,
+        amount: del.amount,
+      })),
+    })
+  }
+  return delegateBalances
 }

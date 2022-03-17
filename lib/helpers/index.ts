@@ -1,14 +1,13 @@
 import { DelegateBalance } from '../types/delegate'
 
-export const kFormatter = (
-  num: number,
-  decimals: number = 1
-): string | number => {
-  return num > 999 ? (num / 1000).toFixed(decimals) + 'k' : num
+export const kFormatter = (num: number, decimals: number = 1): string => {
+  return num > 999
+    ? (num / 1000).toFixed(decimals) + 'k'
+    : num.toFixed(decimals)
 }
 
 export const kFormatterInt = (num: number): string | number => {
-  return num > 999 ? num / 1000 + 'k' : num
+  return num > 999 ? Math.round(num / 1000) + 'k' : Math.round(num)
 }
 
 export const reduceAndFormatDelegations = (
