@@ -1,9 +1,20 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import useSWRImmutable from 'swr/immutable'
-import { createTheme, ThemeProvider } from '@mui/material'
+import {
+  createTheme,
+  ThemeProvider,
+  PaletteMode,
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  Container,
+} from '@mui/material'
+import { Brightness4, Brightness7 } from '@mui/icons-material'
 
 import {
   getGovernanceData,
@@ -23,14 +34,22 @@ import BarChart from '../components/BarChart'
 import { reduceAndFormatDelegations, reduceDelegators } from '../lib/helpers'
 import styles from '../styles/Home.module.css'
 
-const theme = createTheme({
-  palette: { primary: { main: 'hsl(173, 74%, 39%)' } },
-})
-
 const Home: NextPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null)
   const [selectedTime, setSelectedTime] = useState<number | null>(null)
+  const [mode, setMode] = useState<PaletteMode>('light')
+
+  useEffect(() => {
+    if (localStorage.getItem('theme'))
+      setMode(localStorage.getItem('theme') as PaletteMode)
+  }, [])
+
+  const toggleMode = () => {
+    const newMode = mode === 'light' ? 'dark' : 'light'
+    localStorage.setItem('theme', newMode)
+    setMode(newMode)
+  }
 
   // Fetch data - start
   const { data: governanceData } = useSWRImmutable(
@@ -87,6 +106,16 @@ const Home: NextPage = () => {
     setSelectedAddress(address)
   }
 
+  const theme = createTheme({
+    palette: {
+      mode,
+      primary: { main: 'hsl(173, 74%, 39%)' },
+      background: {
+        default: mode === 'light' ? '#f7f8f9' : '#121212',
+      },
+    },
+  })
+
   return (
     <ThemeProvider theme={theme}>
       <div className={styles.container}>
@@ -99,24 +128,39 @@ const Home: NextPage = () => {
           <link rel='icon' href='/favicon.ico' />
         </Head>
 
-        <nav className={styles.nav}>
-          <div className={styles.logoContainer}>
-            <Image
-              src='/makerlogo.png'
-              alt='Maker logo'
-              width={42}
-              height={30}
-            />
-            MakerDAO Governance Metrics
-          </div>
-          <AutocompleteInput
-            mkrBalancesData={mkrBalancesData}
-            selectedAddress={selectedAddress}
-            setSelectedAddress={handleSelectDelegate}
-          />
-        </nav>
+        <AppBar color='default'>
+          <Toolbar>
+            <Box sx={{ flexGrow: 1 }}>
+              <div className={styles.logoContainer}>
+                <Image
+                  src='/makerlogo.png'
+                  alt='Maker logo'
+                  width={42}
+                  height={30}
+                />
+                <Typography variant='h6'>
+                  MakerDAO Governance Metrics
+                </Typography>
+              </div>
+            </Box>
+            <Box sx={{ display: 'flex', gap: '0.5em' }}>
+              <AutocompleteInput
+                mkrBalancesData={mkrBalancesData}
+                selectedAddress={selectedAddress}
+                setSelectedAddress={handleSelectDelegate}
+              />
+              <IconButton onClick={toggleMode}>
+                {theme.palette.mode === 'dark' ? (
+                  <Brightness7 />
+                ) : (
+                  <Brightness4 />
+                )}
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </AppBar>
 
-        <main className={styles.main}>
+        <Box className={styles.main} bgcolor='background.default'>
           <TableCard
             title='Top Recognized Delegates'
             delegates={recognizedDelegates}
@@ -300,22 +344,28 @@ const Home: NextPage = () => {
                 }))
             }
           />
-        </main>
+        </Box>
 
-        <footer className={styles.footer}>
-          <div>
-            <span>
-              Built by{' '}
-              <a
-                target='_blank'
-                rel='noreferrer'
-                href='https://forum.makerdao.com/u/hernandoagf'
-              >
-                hernandoagf
-              </a>
-            </span>
-          </div>
-        </footer>
+        <Box
+          bgcolor='background.default'
+          borderTop='1px solid'
+          borderColor='divider'
+        >
+          <footer className={styles.footer}>
+            <div>
+              <Typography color='text.secondary'>
+                Built by{' '}
+                <a
+                  target='_blank'
+                  rel='noreferrer'
+                  href='https://forum.makerdao.com/u/hernandoagf'
+                >
+                  hernandoagf
+                </a>
+              </Typography>
+            </div>
+          </footer>
+        </Box>
       </div>
     </ThemeProvider>
   )

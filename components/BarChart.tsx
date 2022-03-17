@@ -1,8 +1,9 @@
-import { Card, Skeleton } from '@mui/material'
+import { Card, Skeleton, useTheme } from '@mui/material'
 import { ResponsiveBar } from '@nivo/bar'
 
 import styles from '../styles/Home.module.css'
 import { PollVotersData } from '../lib/types/delegate'
+import getTheme from '../lib/nivo/theme'
 
 type Props = {
   title: string
@@ -10,6 +11,8 @@ type Props = {
 }
 
 const BarChart = ({ title, data }: Props): JSX.Element => {
+  const theme = useTheme()
+
   return (
     <Card className={styles.chartCard}>
       <h3>{title}</h3>
@@ -24,15 +27,7 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
             indexBy='month'
             margin={{ left: 60, bottom: 40, top: 5, right: 50 }}
             padding={0.2}
-            theme={{
-              axis: {
-                legend: {
-                  text: {
-                    fontWeight: 'bold',
-                  },
-                },
-              },
-            }}
+            theme={getTheme(theme)}
             axisLeft={{
               legend: 'Voters',
               legendOffset: -50,
@@ -50,7 +45,7 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
             isInteractive={true}
             enableLabel={false}
             tooltip={({ data, color }) => (
-              <div className={styles.chartTooltip}>
+              <Card className={styles.chartTooltip}>
                 <span
                   className={styles.tooltipCircle}
                   style={{ backgroundColor: color }}
@@ -58,7 +53,7 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
                 <span>
                   {data.month}: <b>{data.uniqueVoters}</b> voters
                 </span>
-              </div>
+              </Card>
             )}
           />
         )}

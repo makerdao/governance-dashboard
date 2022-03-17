@@ -19,12 +19,13 @@
 
 .main {
   min-height: 100vh;
+  margin-top: 3.5em;
   padding: 1.5rem 4rem;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-auto-rows: 125px;
   gap: 0.8rem;
-  background-color: #f7f8f9;
+  /* background-color: #f7f8f9; */
 }
 
 .tableCard {
@@ -42,11 +43,8 @@
 }
 
 .chartTooltip {
-  background: #fff;
-  border-radius: 2px;
   margin: 0;
   padding: 0.3em 0.5em;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 1px 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -106,8 +104,7 @@
 .footer {
   display: flex;
   flex: 1;
-  padding: 1.5rem 0;
-  border-top: 1px solid #eaeaea;
+  padding: 1.2rem 0;
   justify-content: center;
   align-items: center;
 }

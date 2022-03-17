@@ -1,11 +1,12 @@
 import { Dispatch, SetStateAction } from 'react'
 import { ResponsiveSunburst } from '@nivo/sunburst'
-import { Card, Skeleton } from '@mui/material'
+import { Card, Skeleton, useTheme } from '@mui/material'
 
 import styles from '../styles/Home.module.css'
 import { CenteredSunburstMetric } from './CenteredMetric'
 import { GroupedUserBalances } from '../lib/types/delegate'
 import { kFormatter } from '../lib/helpers'
+import getTheme from '../lib/nivo/theme'
 
 type Props = {
   title: string
@@ -22,6 +23,8 @@ const SunburstChart = ({
   setSelectedAddress,
   setSelectedDelegate,
 }: Props): JSX.Element => {
+  const theme = useTheme()
+
   return (
     <Card className={styles.chartCard}>
       <h3>{title}</h3>
@@ -58,17 +61,19 @@ const SunburstChart = ({
             }}
             id='name'
             value='amount'
+            theme={getTheme(theme)}
             borderWidth={1}
+            borderColor={{ theme: 'background' }}
             colors={customColors}
             childColor={{ from: 'color', modifiers: [['brighter', 0.3]] }}
             enableArcLabels={true}
             arcLabelsSkipAngle={10}
             arcLabelsTextColor={{
               from: 'color',
-              modifiers: [['darker', 1.5]],
+              modifiers: [['darker', 2.5]],
             }}
             tooltip={(datum) => (
-              <div className={styles.chartTooltip}>
+              <Card className={styles.chartTooltip}>
                 <span
                   className={styles.tooltipCircle}
                   style={{ backgroundColor: datum.color }}
@@ -85,7 +90,7 @@ const SunburstChart = ({
                     {kFormatter(datum.value, 2)} MKR | {datum.formattedValue}
                   </b>
                 </span>
-              </div>
+              </Card>
             )}
             onClick={(slice) => {
               if (slice.depth !== 2) return

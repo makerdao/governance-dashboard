@@ -1,5 +1,6 @@
 import { PieCustomLayerProps } from '@nivo/pie'
 import { SunburstCustomLayerProps } from '@nivo/sunburst'
+import { useTheme } from '@mui/material'
 
 import { kFormatter } from '../lib/helpers'
 
@@ -26,6 +27,8 @@ type CenteredMetricProps = {
 }
 
 const CenteredMetric = ({ total, centerX, centerY }: CenteredMetricProps) => {
+  const theme = useTheme()
+
   return (
     <text
       x={centerX}
@@ -35,6 +38,7 @@ const CenteredMetric = ({ total, centerX, centerY }: CenteredMetricProps) => {
       style={{
         fontSize: '40px',
         fontWeight: 500,
+        fill: theme.palette.text.primary,
       }}
     >
       {total}

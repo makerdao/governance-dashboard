@@ -1,9 +1,10 @@
 import { Dispatch, SetStateAction } from 'react'
 import { Serie, ResponsiveLine } from '@nivo/line'
-import { Card, Skeleton } from '@mui/material'
+import { Card, Skeleton, useTheme } from '@mui/material'
 
 import styles from '../styles/Home.module.css'
 import { kFormatter, kFormatterInt } from '../lib/helpers'
+import getTheme from '../lib/nivo/theme'
 
 type Props = {
   data: Serie[] | undefined
@@ -34,6 +35,8 @@ const LineChart = ({
   margin,
   enableLegend = true,
 }: Props): JSX.Element => {
+  const theme = useTheme()
+
   return (
     <Card className={styles.chartCard}>
       <h3>{title}</h3>
@@ -56,15 +59,7 @@ const LineChart = ({
               top: margin?.top || 5,
               right: margin?.right || 80,
             }}
-            theme={{
-              axis: {
-                legend: {
-                  text: {
-                    fontWeight: 'bold',
-                  },
-                },
-              },
-            }}
+            theme={getTheme(theme)}
             colors={
               mkrColors
                 ? ['hsl(173, 74%, 39%)', 'hsl(41, 90%, 57%)']
@@ -89,7 +84,7 @@ const LineChart = ({
             useMesh={true}
             tooltip={({ point }) => {
               return (
-                <div className={styles.chartTooltip}>
+                <Card className={styles.chartTooltip}>
                   <span
                     className={styles.tooltipCircle}
                     style={{ backgroundColor: point.color }}
@@ -97,7 +92,7 @@ const LineChart = ({
                   <span>
                     {point.data.xFormatted}: <b>{point.data.yFormatted}</b>
                   </span>
-                </div>
+                </Card>
               )
             }}
             legends={
@@ -116,7 +111,7 @@ const LineChart = ({
                   ]
             }
             enableArea={enableArea}
-            areaOpacity={stacked ? 1 : 0.2}
+            areaOpacity={stacked ? 0.7 : 0.2}
             enableSlices={enableSlices && 'x'}
             onClick={(point) => {
               if (!enableClick) return
