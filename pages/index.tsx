@@ -11,11 +11,14 @@ import {
   getPollVoters,
   getMkrBalances,
   getGroupedBalances,
+  getDelegatesBalances,
 } from '../lib/governanceData'
 import AutocompleteInput from '../components/AutocompleteInput'
 import TableCard from '../components/TableCard'
 import DataCard from '../components/DataCard'
 import LineChart from '../components/LineChart'
+import SunburstChart from '../components/SunburstChart'
+import PieChart from '../components/PieChart'
 import BarChart from '../components/BarChart'
 import { reduceAndFormatDelegations, reduceDelegators } from '../lib/helpers'
 import styles from '../styles/Home.module.css'
@@ -27,6 +30,7 @@ const theme = createTheme({
 const Home: NextPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
   const [selectedDelegate, setSelectedDelegate] = useState<string | null>(null)
+  const [selectedTime, setSelectedTime] = useState<number | null>(null)
 
   // Fetch data - start
   const { data: governanceData } = useSWRImmutable(
@@ -49,6 +53,17 @@ const Home: NextPage = () => {
   const { data: groupedBalancesData } = useSWRImmutable(
     () => (governanceData && mkrBalancesData ? '/groupedBalancesData' : null),
     () => getGroupedBalances(governanceData?.topDelegates, mkrBalancesData)
+  )
+  const { data: delegatesBalancesData } = useSWRImmutable(
+    () =>
+      governanceData?.allDelegations && governanceData?.topDelegates
+        ? '/delegatesBalancesData'
+        : null,
+    () =>
+      getDelegatesBalances(
+        governanceData?.allDelegations,
+        governanceData?.topDelegates
+      )
   )
   // Fetch data - end
 
@@ -160,35 +175,54 @@ const Home: NextPage = () => {
             }
           />
           <LineChart
-            datasetOne={stakedMkrData?.mkrStakedData.map((entry) => ({
-              x: entry.time,
-              y: entry.amount,
-            }))}
-            datasetTwo={governanceData?.mkrDelegatedData.map((entry) => ({
-              x: entry.time,
-              y: entry.amount,
-            }))}
-            datasetOneId='Staked'
-            datasetTwoId='Delegated'
+            data={
+              stakedMkrData &&
+              governanceData && [
+                {
+                  id: 'Staked',
+                  data: stakedMkrData.mkrStakedData.map((entry) => ({
+                    x: entry.time,
+                    y: entry.amount,
+                  })),
+                },
+                {
+                  id: 'Delegated',
+                  data: governanceData?.mkrDelegatedData.map((entry) => ({
+                    x: entry.time,
+                    y: entry.amount,
+                  })),
+                },
+              ]
+            }
             legendX='Date'
             legendY='MKR'
             title='Staked and Delegated MKR'
           />
           <LineChart
-            datasetOne={mkrBalancesData?.map((entry) => ({
-              x: entry.time,
-              y:
-                entry.balances.find((bal) => bal.sender === selectedAddress)
-                  ?.amount || 0,
-            }))}
-            datasetTwo={mkrBalancesData?.map((entry) => ({
-              x: entry.time,
-              y:
-                entry.balances.find((bal) => bal.sender === selectedAddress)
-                  ?.delegated || 0,
-            }))}
-            datasetOneId='Staked'
-            datasetTwoId='Delegated'
+            data={
+              mkrBalancesData && [
+                {
+                  id: 'Staked',
+                  data: mkrBalancesData.map((entry) => ({
+                    x: entry.time,
+                    y:
+                      entry.balances.find(
+                        (bal) => bal.sender === selectedAddress
+                      )?.amount || 0,
+                  })),
+                },
+                {
+                  id: 'Delegated',
+                  data: mkrBalancesData.map((entry) => ({
+                    x: entry.time,
+                    y:
+                      entry.balances.find(
+                        (bal) => bal.sender === selectedAddress
+                      )?.delegated || 0,
+                  })),
+                },
+              ]
+            }
             legendX='Date'
             legendY='MKR'
             title={
@@ -205,14 +239,82 @@ const Home: NextPage = () => {
             }
             enableArea={true}
           />
+          <SunburstChart
+            title='Current vote weights - select a user to see their stakes and delegations'
+            data={groupedBalancesData}
+            setSelectedAddress={setSelectedAddress}
+            setSelectedDelegate={setSelectedDelegate}
+            customColors={[
+              'hsl(173, 74%, 39%)',
+              'hsl(173, 35%, 65%)',
+              'hsl(41, 90%, 57%)',
+            ]}
+          />
           <BarChart
             title='Average unique voters per poll per month'
             data={pollVotersData}
           />
+          <LineChart
+            data={
+              recognizedDelegates &&
+              delegatesBalancesData &&
+              recognizedDelegates.map((del) => ({
+                id: del.name || del.voteDelegate,
+                data: delegatesBalancesData.map((entry) => ({
+                  x: entry.time,
+                  y:
+                    entry.balances.find(
+                      (bal) => bal.address === del.voteDelegate
+                    )?.amount || 0,
+                })),
+              }))
+            }
+            legendX='Date'
+            legendY='MKR'
+            title='Recognized Delegates vote weights - click a data point to select time'
+            mkrColors={false}
+            enableClick={true}
+            clickFunction={setSelectedTime}
+            enableLegend={false}
+            enableArea={true}
+            stacked={true}
+          />
+          <PieChart
+            title={`Delegates vote weights at selected time - ${
+              selectedTime ? new Date(selectedTime).toLocaleDateString() : 'now'
+            }`}
+            data={
+              recognizedDelegates &&
+              delegatesBalancesData &&
+              delegatesBalancesData
+                .find((elem, idx, array) =>
+                  selectedTime
+                    ? elem.time.getTime() === selectedTime
+                    : idx === array.length - 1
+                )
+                ?.balances.filter((del) => del.amount > 0)
+                .map((del) => ({
+                  id: del.name || del.address,
+                  value: del.amount,
+                  address: del.address,
+                }))
+            }
+          />
         </main>
 
         <footer className={styles.footer}>
-          Built by the GovAlpha Core Unit
+          <div>
+            <span>
+              Built by{' '}
+              <a
+                target='_blank'
+                rel='noreferrer'
+                href='https://forum.makerdao.com/u/hernandoagf'
+              >
+                hernandoagf
+              </a>
+            </span>
+          </div>
         </footer>
       </div>
     </ThemeProvider>
