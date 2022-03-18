@@ -138,9 +138,10 @@ const TableCard = ({
                     {delegate.delegatorCount}
                   </TableCell>
                   <TableCell align='center'>
-                    {(+parseFloat(delegate.lockTotal).toFixed(
-                      2
-                    )).toLocaleString('en-US')}
+                    {(+delegate.lockTotal > 999
+                      ? parseInt(delegate.lockTotal)
+                      : +parseFloat(delegate.lockTotal).toFixed(2)
+                    ).toLocaleString('en-US')}
                   </TableCell>
                 </TableRow>
               ))}

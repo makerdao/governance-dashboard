@@ -2,9 +2,11 @@ import { Dispatch, SetStateAction } from 'react'
 import { Serie, ResponsiveLine } from '@nivo/line'
 import { Card, Skeleton, useTheme } from '@mui/material'
 
+import InfoTooltip from './InfoTooltip'
 import styles from '../styles/Home.module.css'
 import { kFormatter, kFormatterInt } from '../lib/helpers'
 import getTheme from '../lib/nivo/theme'
+import { mkrPalette, mkrPaletteMain } from '../lib/nivo/colors'
 
 type Props = {
   data: Serie[] | undefined
@@ -19,6 +21,7 @@ type Props = {
   clickFunction?: Dispatch<SetStateAction<number | null>>
   margin?: { top?: number; right?: number; bottom?: number; left?: number }
   enableLegend?: boolean
+  infoTooltipText?: string
 }
 
 const LineChart = ({
@@ -34,12 +37,15 @@ const LineChart = ({
   clickFunction,
   margin,
   enableLegend = true,
+  infoTooltipText,
 }: Props): JSX.Element => {
   const theme = useTheme()
 
   return (
     <Card className={styles.chartCard}>
-      <h3>{title}</h3>
+      <h3>
+        {title} {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
+      </h3>
       <div className={styles.chartContainer}>
         {!data ? (
           <Skeleton variant='rectangular' height={'100%'} animation='wave' />
@@ -60,11 +66,7 @@ const LineChart = ({
               right: margin?.right || 80,
             }}
             theme={getTheme(theme)}
-            colors={
-              mkrColors
-                ? ['hsl(173, 74%, 39%)', 'hsl(41, 90%, 57%)']
-                : { scheme: 'nivo' }
-            }
+            colors={mkrColors ? mkrPaletteMain : mkrPalette}
             enablePoints={false}
             enableGridX={false}
             axisLeft={{
@@ -111,7 +113,7 @@ const LineChart = ({
                   ]
             }
             enableArea={enableArea}
-            areaOpacity={stacked ? 0.7 : 0.2}
+            areaOpacity={0.05}
             enableSlices={enableSlices && 'x'}
             onClick={(point) => {
               if (!enableClick) return

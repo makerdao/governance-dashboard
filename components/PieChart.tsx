@@ -1,22 +1,27 @@
 import { ResponsivePie } from '@nivo/pie'
 import { Card, Skeleton, useTheme } from '@mui/material'
 
+import InfoTooltip from './InfoTooltip'
 import styles from '../styles/Home.module.css'
 import { CenteredPieMetric } from './CenteredMetric'
 import { kFormatter } from '../lib/helpers'
 import getTheme from '../lib/nivo/theme'
+import { mkrPalette } from '../lib/nivo/colors'
 
 type Props = {
   title: string
   data: { id: string; value: number }[] | undefined
+  infoTooltipText?: string
 }
 
-const PieChart = ({ title, data }: Props): JSX.Element => {
+const PieChart = ({ title, data, infoTooltipText }: Props): JSX.Element => {
   const theme = useTheme()
 
   return (
     <Card className={styles.chartCard}>
-      <h3>{title}</h3>
+      <h3>
+        {title} {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
+      </h3>
       <div className={styles.chartContainer}>
         {!data ? (
           <Skeleton variant='rectangular' height={'100%'} animation='wave' />
@@ -33,6 +38,7 @@ const PieChart = ({ title, data }: Props): JSX.Element => {
             borderWidth={1.5}
             borderColor={{ theme: 'background' }}
             theme={getTheme(theme)}
+            colors={mkrPalette}
             arcLinkLabelsSkipAngle={10}
             arcLinkLabelsTextColor={theme.palette.text.primary}
             arcLinkLabelsThickness={2}

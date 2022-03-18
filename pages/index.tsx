@@ -217,29 +217,16 @@ const Home: NextPage = () => {
               ]
             }
           />
-          <LineChart
-            data={
-              stakedMkrData &&
-              governanceData && [
-                {
-                  id: 'Staked',
-                  data: stakedMkrData.mkrStakedData.map((entry) => ({
-                    x: entry.time,
-                    y: entry.amount,
-                  })),
-                },
-                {
-                  id: 'Delegated',
-                  data: governanceData?.mkrDelegatedData.map((entry) => ({
-                    x: entry.time,
-                    y: entry.amount,
-                  })),
-                },
-              ]
-            }
-            legendX='Date'
-            legendY='MKR'
-            title='Staked and Delegated MKR'
+          <SunburstChart
+            title='Current Vote Weights for all users'
+            data={groupedBalancesData}
+            setSelectedAddress={setSelectedAddress}
+            setSelectedDelegate={setSelectedDelegate}
+            customColors={[
+              'hsl(173, 74%, 39%)',
+              'hsl(173, 35%, 65%)',
+              'hsl(41, 90%, 57%)',
+            ]}
           />
           <LineChart
             data={
@@ -278,23 +265,37 @@ const Home: NextPage = () => {
                         '...' +
                         selectedAddress.slice(38)
                   }`
-                : 'Please select an address on the navbar selector to render the data'
+                : 'Staked and Delegated MKR - select an address to see the data'
             }
             enableArea={true}
+            infoTooltipText='You can select an address on the navbar selector, a delegate on the delegates tables or a user on the Current Vote Weights chart'
           />
-          <SunburstChart
-            title='Current vote weights - select a user to see their stakes and delegations'
-            data={groupedBalancesData}
-            setSelectedAddress={setSelectedAddress}
-            setSelectedDelegate={setSelectedDelegate}
-            customColors={[
-              'hsl(173, 74%, 39%)',
-              'hsl(173, 35%, 65%)',
-              'hsl(41, 90%, 57%)',
-            ]}
+          <LineChart
+            data={
+              stakedMkrData &&
+              governanceData && [
+                {
+                  id: 'Staked',
+                  data: stakedMkrData.mkrStakedData.map((entry) => ({
+                    x: entry.time,
+                    y: entry.amount,
+                  })),
+                },
+                {
+                  id: 'Delegated',
+                  data: governanceData?.mkrDelegatedData.map((entry) => ({
+                    x: entry.time,
+                    y: entry.amount,
+                  })),
+                },
+              ]
+            }
+            legendX='Date'
+            legendY='MKR'
+            title='Total Staked and Delegated MKR'
           />
           <BarChart
-            title='Average unique voters per poll per month'
+            title='Average Unique Voters per poll per month'
             data={pollVotersData}
           />
           <LineChart
@@ -314,7 +315,7 @@ const Home: NextPage = () => {
             }
             legendX='Date'
             legendY='MKR'
-            title='Recognized Delegates vote weights - click a data point to select time'
+            title='Recognized Delegates Vote Weights'
             mkrColors={false}
             enableClick={true}
             clickFunction={setSelectedTime}
@@ -323,9 +324,10 @@ const Home: NextPage = () => {
             stacked={true}
           />
           <PieChart
-            title={`Delegates vote weights at selected time - ${
+            title={`All Delegates Vote Weights at selected time - ${
               selectedTime ? new Date(selectedTime).toLocaleDateString() : 'now'
             }`}
+            infoTooltipText='You can select the time by clicking on a data point on the Recognized Delegates Vote Weights chart'
             data={
               recognizedDelegates &&
               delegatesBalancesData &&
