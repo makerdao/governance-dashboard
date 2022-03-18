@@ -19,13 +19,12 @@
 
 .main {
   min-height: 100vh;
-  margin-top: 3.5em;
+  margin-top: 4em;
   padding: 1.5rem 4rem;
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   grid-auto-rows: 125px;
-  gap: 0.8rem;
-  /* background-color: #f7f8f9; */
+  gap: 1rem;
 }
 
 .tableCard {
