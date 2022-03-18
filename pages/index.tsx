@@ -12,7 +12,6 @@ import {
   Typography,
   Box,
   IconButton,
-  Container,
 } from '@mui/material'
 import { Brightness4, Brightness7 } from '@mui/icons-material'
 
@@ -139,7 +138,7 @@ const Home: NextPage = () => {
                   height={30}
                 />
                 <Typography variant='h6'>
-                  MakerDAO Governance Metrics
+                  MakerDAO Governance Dashboard
                 </Typography>
               </div>
             </Box>
