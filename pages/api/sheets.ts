@@ -12,7 +12,7 @@ const getSheetsData = async (req: NextApiRequest, res: NextApiResponse) => {
     if (!sheetsRes.ok) throw 'Error fetching Google Sheets data'
 
     const data = await sheetsRes.json()
-    const proposalItems = data.values.slice(2).map((item) => ({
+    const proposalItems = data.values.slice(2).map((item: any) => ({
       title: item[5],
       endDate: new Date(item[1]),
       forum: item[6],
@@ -25,14 +25,14 @@ const getSheetsData = async (req: NextApiRequest, res: NextApiResponse) => {
     }))
 
     const formattedProposalItems = {
-      executive: proposalItems.filter((item) => item.type === 'Executive'),
+      executive: proposalItems.filter((item: any) => item.type === 'Executive'),
       onChainPolls: proposalItems.filter(
-        (item) => item.type === 'On-Chain Poll'
+        (item: any) => item.type === 'On-Chain Poll'
       ),
       offChainPolls: proposalItems.filter(
-        (item) => item.type === 'Off-Chain Poll'
+        (item: any) => item.type === 'Off-Chain Poll'
       ),
-      forumDiscussions: proposalItems.filter((item) =>
+      forumDiscussions: proposalItems.filter((item: any) =>
         ['Notification', 'Informal Poll', 'Forum Discussion'].includes(
           item.type
         )
