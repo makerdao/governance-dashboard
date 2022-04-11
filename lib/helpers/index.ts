@@ -30,3 +30,21 @@ export const reduceDelegators = (
     ? delegates.reduce((acum, delegate) => acum + delegate.delegatorCount, 0)
     : 0
 }
+
+export const calculateTimeDiff = (endTime: number): string => {
+  const timeDiffNum = Math.round((endTime - Date.now()) / 1000)
+  if (timeDiffNum <= 0) return 'Ended'
+
+  const hour = 60 * 60
+  const day = hour * 24
+  const result = []
+
+  const remainingDays = Math.floor(timeDiffNum / day)
+  if (remainingDays > 0) result.push(remainingDays + 'D')
+
+  const remainingTime = timeDiffNum % day
+  const remainingHours = Math.round(remainingTime / hour)
+  if (remainingHours > 0) result.push(remainingHours + 'H')
+
+  return result.join(' ')
+}
