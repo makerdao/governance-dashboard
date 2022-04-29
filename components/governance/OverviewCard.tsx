@@ -24,6 +24,22 @@ type Props = {
   buttonHref: string
 }
 
+const SubHeading = ({ children }: { children: Node }) => (
+  <Typography
+    component='span'
+    sx={{
+      margin: '1em 0',
+      textTransform: 'uppercase',
+      fontWeight: 'bold',
+      letterSpacing: '0.75px',
+      display: 'flex',
+      color: 'white',
+    }}
+  >
+    {children}
+  </Typography>
+)
+
 const OverviewCard = ({
   proposals,
   title,
@@ -104,27 +120,25 @@ const OverviewCard = ({
             <>
               {amountActive !== 0 && (
                 <Box mt={3}>
-                  <Typography
-                    component='span'
-                    className={styles.overviewCardSubHeading}
-                  >
+                  <SubHeading>
                     <Box component='span' className={styles.overviewActiveTag}>
                       {amountActive} active
                     </Box>
-                  </Typography>
+                  </SubHeading>
                   <Divider light className={styles.cardDivider}>
                     Impact
                   </Divider>
                   <Typography className={styles.overviewText}>
-                    {highImpactActive && highImpactActive > 0 && (
-                      <span>{highImpactActive} high</span>
-                    )}
-                    {mediumImpactActive && mediumImpactActive > 0 && (
-                      <span>{mediumImpactActive} medium</span>
-                    )}
-                    {lowImpactActive && lowImpactActive > 0 && (
-                      <span>{lowImpactActive} low</span>
-                    )}
+                    {typeof highImpactActive !== 'undefined' &&
+                      highImpactActive > 0 && (
+                        <span>{highImpactActive} high</span>
+                      )}
+                    {typeof mediumImpactActive !== 'undefined' &&
+                      mediumImpactActive > 0 && (
+                        <span>{mediumImpactActive} medium</span>
+                      )}
+                    {typeof lowImpactActive !== 'undefined' &&
+                      lowImpactActive > 0 && <span>{lowImpactActive} low</span>}
                   </Typography>
                   {(endingThisWeek !== 0 || endingNextWeek !== 0) && (
                     <>
@@ -145,24 +159,27 @@ const OverviewCard = ({
               )}
               {amountPending !== 0 && (
                 <Box mt={3}>
-                  <Typography className={styles.overviewCardSubHeading}>
+                  <SubHeading>
                     <Box component='span' className={styles.overviewPendingTag}>
                       {amountPending} pending
                     </Box>
-                  </Typography>
+                  </SubHeading>
                   <Divider light className={styles.cardDivider}>
                     Impact
                   </Divider>
                   <Typography className={styles.overviewText}>
-                    {highImpactPending && highImpactPending > 0 && (
-                      <span>{highImpactPending} high</span>
-                    )}
-                    {mediumImpactPending && mediumImpactPending > 0 && (
-                      <span>{mediumImpactPending} medium</span>
-                    )}
-                    {lowImpactPending && lowImpactPending > 0 && (
-                      <span>{lowImpactPending} low</span>
-                    )}
+                    {typeof highImpactPending !== 'undefined' &&
+                      highImpactPending > 0 && (
+                        <span>{highImpactPending} high</span>
+                      )}
+                    {typeof mediumImpactPending !== 'undefined' &&
+                      mediumImpactPending > 0 && (
+                        <span>{mediumImpactPending} medium</span>
+                      )}
+                    {typeof lowImpactPending !== 'undefined' &&
+                      lowImpactPending > 0 && (
+                        <span>{lowImpactPending} low</span>
+                      )}
                   </Typography>
                   {(startingThisWeek !== 0 || startingNextWeek !== 0) && (
                     <>
