@@ -1,7 +1,7 @@
 export enum Impact {
-  Low = 'LOW',
-  Medium = 'MEDIUM',
-  High = 'HIGH',
+  Low = 'Low',
+  Medium = 'Medium',
+  High = 'High',
 }
 
 export enum ActivityStatus {
@@ -20,12 +20,13 @@ export enum Status {
   PLANNED = 'PLANNED',
 }
 
-export type ExecutiveProposal = {
+export type Proposal = {
   title: string
   impact: Impact
+  type: string
   activityStatus: ActivityStatus
   status: Status
-  endDate: Date
+  endDate: string
   class: string
   forum: string
   poll: string

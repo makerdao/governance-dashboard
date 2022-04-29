@@ -20,11 +20,16 @@
 .navigationContainer {
   display: flex;
   align-items: center;
-  gap: 1.5em;
-  margin-right: 2em;
+  gap: 1em;
+  margin: 0 0.5em;
 }
 
-.navigationContainer a:hover {
+.navigationContainer p {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.navigationContainer p:hover {
   color: hsl(173, 74%, 39%);
 }
 
@@ -39,25 +44,37 @@
 }
 
 .mainFlex {
-  min-height: 100vh;
+  height: calc(100vh - 129px);
   margin-top: 4em;
-  padding: 1.5rem 4rem;
+  padding: 1.5rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
+.mainFlexOverview {
+  min-height: calc(100vh - 129px);
+  margin-top: 4em;
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.overviewContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+  gap: 1em;
+}
+
 .tableCard {
   grid-row: span 3;
   grid-column: span 5;
-  padding: 0 1em 1em 1em;
-  overflow: visible;
 }
 
 .chartCard {
   grid-row: span 3;
   grid-column: span 6;
-  padding: 0 1em 1em 1em;
   overflow: visible;
 }
 
@@ -79,14 +96,10 @@
 .infoCard {
   grid-row: span 1;
   grid-column: span 2;
-  padding: 0 1em 1em 1em;
-  display: flex;
-  flex-direction: column;
 }
 
 .infoCardContainer {
   text-align: center;
-  flex-grow: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -117,13 +130,17 @@
 }
 
 .chartContainer {
-  height: calc(100% - 50px);
+  height: calc(100% - 39px);
+  padding: 2.3em 0.6em 0.6em 0.6em;
 }
 
-.proposalTableCard {
-  padding: 1em;
-  overflow: visible;
-  max-height: 45vh;
+.pieChartContainer {
+  height: calc(100% - 39px);
+  padding: 0.6em;
+}
+
+.proposalTableCard h5 {
+  margin-bottom: 0.2em;
 }
 
 .activeTag {
@@ -140,6 +157,30 @@
   color: white;
   padding: 1px 4px;
   margin: 0 5px;
+}
+
+.archivedTag {
+  border-radius: 3px;
+  background-color: rgba(183, 183, 183, 0.8);
+  color: white;
+  padding: 1px 4px;
+  margin: 0 10px;
+}
+
+.successfulArchivedTag {
+  border-radius: 3px;
+  background-color: rgba(143, 178, 140, 0.6);
+  color: white;
+  padding: 1px 4px;
+  margin: 0 10px;
+}
+
+.unsuccessfulArchivedTag {
+  border-radius: 3px;
+  background-color: rgba(199, 144, 142, 0.6);
+  color: white;
+  padding: 1px 4px;
+  margin: 0 10px;
 }
 
 .highImpactTag {
@@ -176,6 +217,46 @@
 
 .footer a {
   color: hsl(173, 74%, 39%);
+}
+
+.overviewCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.overviewCardSubHeading {
+  margin: 1em 0;
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.75px;
+  display: flex;
+  color: white;
+}
+
+.overviewActiveTag {
+  background-color: rgba(61, 127, 90, 0.8);
+  padding: 0 0.7em;
+  border-radius: 4px;
+}
+
+.overviewPendingTag {
+  background-color: rgba(175, 126, 53, 0.8);
+  padding: 0 0.7em;
+  border-radius: 4px;
+}
+
+.cardDivider {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.65px;
+  opacity: 0.7;
+}
+
+.overviewText {
+  margin: 0.5em;
+  display: flex;
+  gap: 0.5em;
 }
 
 .title a {

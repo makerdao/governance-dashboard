@@ -45,6 +45,7 @@ export const calculateTimeDiff = (endTime: number): string => {
   const remainingTime = timeDiffNum % day
   const remainingHours = Math.round(remainingTime / hour)
   if (remainingHours > 0) result.push(remainingHours + 'H')
+  else result.push('< 1H')
 
   return result.join(' ')
 }
