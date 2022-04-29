@@ -15,6 +15,7 @@ import { DateTime } from 'luxon'
 import { Proposal } from '../../lib/types/tracker'
 import styles from '../../styles/Home.module.css'
 import Loading from '../Loading'
+import { ReactNode } from 'react'
 
 type Props = {
   proposals: Proposal[] | undefined
@@ -24,7 +25,7 @@ type Props = {
   buttonHref: string
 }
 
-const SubHeading = ({ children }: { children: Node }) => (
+const SubHeading = ({ children }: { children: ReactNode }) => (
   <Typography
     component='span'
     sx={{
@@ -36,7 +37,7 @@ const SubHeading = ({ children }: { children: Node }) => (
       color: 'white',
     }}
   >
-    {children}
+    {children ? children : ''}
   </Typography>
 )
 
