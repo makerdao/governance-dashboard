@@ -14,7 +14,7 @@ const getSheetsData = async (req: NextApiRequest, res: NextApiResponse) => {
     const data = await sheetsRes.json()
     const proposalItems = data.values.slice(2).map((item: any) => ({
       title: item[5],
-      endDate: new Date(item[1]),
+      endDate: new Date(item[1] + ' UTC'),
       forum: item[6],
       impact: item[4],
       type: item[2].split(' - ')[1],
