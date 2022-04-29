@@ -30,6 +30,8 @@ type Props = {
   selectedDelegate: string | null
   setSelectedAddress: Dispatch<SetStateAction<string | null>>
   setSelectedDelegate: Dispatch<SetStateAction<string | null>>
+  selectedStartDate: string | null
+  selectedEndDate: string | null
 }
 
 const Home = ({
@@ -39,6 +41,8 @@ const Home = ({
   selectedDelegate,
   setSelectedAddress,
   setSelectedDelegate,
+  selectedStartDate,
+  selectedEndDate,
 }: Props) => {
   const [selectedTime, setSelectedTime] = useState<number | null>(null)
 
@@ -87,15 +91,18 @@ const Home = ({
     governanceData.topDelegates.filter(
       (delegate) => delegate.status === 'recognized'
     )
-
   const shadowDelegates =
     governanceData &&
     governanceData.topDelegates.filter(
       (delegate) => delegate.status === 'shadow'
     )
 
+  const applyTimeFilters = ({ time }: { time: Date }) =>
+    (selectedStartDate ? time >= new Date(selectedStartDate) : true) &&
+    (selectedEndDate ? time <= new Date(selectedEndDate) : true)
+
   return (
-    <Box className={styles.main} bgcolor='background.default'>
+    <>
       <TableCard
         title='Top Recognized Delegates'
         delegates={recognizedDelegates}
@@ -167,7 +174,7 @@ const Home = ({
           mkrBalancesData && [
             {
               id: 'Delegated',
-              data: mkrBalancesData.map((entry) => ({
+              data: mkrBalancesData.filter(applyTimeFilters).map((entry) => ({
                 x: entry.time,
                 y:
                   entry.balances.find((bal) => bal.sender === selectedAddress)
@@ -176,7 +183,7 @@ const Home = ({
             },
             {
               id: 'Staked',
-              data: mkrBalancesData.map((entry) => ({
+              data: mkrBalancesData.filter(applyTimeFilters).map((entry) => ({
                 x: entry.time,
                 y:
                   entry.balances.find((bal) => bal.sender === selectedAddress)
@@ -208,17 +215,21 @@ const Home = ({
           governanceData && [
             {
               id: 'Delegated',
-              data: governanceData?.mkrDelegatedData.map((entry) => ({
-                x: entry.time,
-                y: entry.amount,
-              })),
+              data: governanceData?.mkrDelegatedData
+                .filter(applyTimeFilters)
+                .map((entry) => ({
+                  x: entry.time,
+                  y: entry.amount,
+                })),
             },
             {
               id: 'Staked',
-              data: stakedMkrData.mkrStakedData.map((entry) => ({
-                x: entry.time,
-                y: entry.amount,
-              })),
+              data: stakedMkrData.mkrStakedData
+                .filter(applyTimeFilters)
+                .map((entry) => ({
+                  x: entry.time,
+                  y: entry.amount,
+                })),
             },
           ]
         }
@@ -236,12 +247,14 @@ const Home = ({
           delegatesBalancesData &&
           recognizedDelegates.map((del) => ({
             id: del.name || del.voteDelegate,
-            data: delegatesBalancesData.map((entry) => ({
-              x: entry.time,
-              y:
-                entry.balances.find((bal) => bal.address === del.voteDelegate)
-                  ?.amount || 0,
-            })),
+            data: delegatesBalancesData
+              .filter(applyTimeFilters)
+              .map((entry) => ({
+                x: entry.time,
+                y:
+                  entry.balances.find((bal) => bal.address === del.voteDelegate)
+                    ?.amount || 0,
+              })),
           }))
         }
         legendX='Date'
@@ -259,6 +272,8 @@ const Home = ({
           selectedTime ? new Date(selectedTime).toLocaleDateString() : 'now'
         }`}
         infoTooltipText='You can select the time by clicking on a data point on the Recognized Delegates Vote Weights chart'
+        backToNow={selectedTime ? true : false}
+        setSelectedTime={setSelectedTime}
         data={
           recognizedDelegates &&
           delegatesBalancesData &&
@@ -276,7 +291,7 @@ const Home = ({
             }))
         }
       />
-    </Box>
+    </>
   )
 }
 
