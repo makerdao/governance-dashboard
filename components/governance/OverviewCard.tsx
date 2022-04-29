@@ -37,7 +37,19 @@ const SubHeading = ({ children }: { children: ReactNode }) => (
       color: 'white',
     }}
   >
-    {children ? children : ''}
+    {children}
+  </Typography>
+)
+
+const OverviewText = ({ children }: { children: ReactNode }) => (
+  <Typography
+    sx={{
+      margin: '0.5em',
+      display: 'flex',
+      gap: '0.5em',
+    }}
+  >
+    {children}
   </Typography>
 )
 
@@ -129,7 +141,7 @@ const OverviewCard = ({
                   <Divider light className={styles.cardDivider}>
                     Impact
                   </Divider>
-                  <Typography className={styles.overviewText}>
+                  <OverviewText>
                     {typeof highImpactActive !== 'undefined' &&
                       highImpactActive > 0 && (
                         <span>{highImpactActive} high</span>
@@ -140,20 +152,20 @@ const OverviewCard = ({
                       )}
                     {typeof lowImpactActive !== 'undefined' &&
                       lowImpactActive > 0 && <span>{lowImpactActive} low</span>}
-                  </Typography>
+                  </OverviewText>
                   {(endingThisWeek !== 0 || endingNextWeek !== 0) && (
                     <>
                       <Divider light className={styles.cardDivider}>
                         End date
                       </Divider>
-                      <Typography className={styles.overviewText}>
+                      <OverviewText>
                         {endingThisWeek !== 0 && (
                           <span>{endingThisWeek} this week</span>
                         )}
                         {endingNextWeek !== 0 && (
                           <span>{endingNextWeek} next week</span>
                         )}
-                      </Typography>
+                      </OverviewText>
                     </>
                   )}
                 </Box>
@@ -168,7 +180,7 @@ const OverviewCard = ({
                   <Divider light className={styles.cardDivider}>
                     Impact
                   </Divider>
-                  <Typography className={styles.overviewText}>
+                  <OverviewText>
                     {typeof highImpactPending !== 'undefined' &&
                       highImpactPending > 0 && (
                         <span>{highImpactPending} high</span>
@@ -181,20 +193,20 @@ const OverviewCard = ({
                       lowImpactPending > 0 && (
                         <span>{lowImpactPending} low</span>
                       )}
-                  </Typography>
+                  </OverviewText>
                   {(startingThisWeek !== 0 || startingNextWeek !== 0) && (
                     <>
                       <Divider light className={styles.cardDivider}>
                         Start date
                       </Divider>
-                      <Typography className={styles.overviewText}>
+                      <OverviewText>
                         {startingThisWeek !== 0 && (
                           <span>{startingThisWeek} this week</span>
                         )}
                         {startingNextWeek !== 0 && (
                           <span>{startingNextWeek} next week</span>
                         )}
-                      </Typography>
+                      </OverviewText>
                     </>
                   )}
                 </Box>
