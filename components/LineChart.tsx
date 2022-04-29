@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react'
 import { Serie, ResponsiveLine } from '@nivo/line'
-import { Card, Skeleton, useTheme } from '@mui/material'
+import { Card, Skeleton, useTheme, Typography } from '@mui/material'
 
 import InfoTooltip from './InfoTooltip'
 import styles from '../styles/Home.module.css'
@@ -42,11 +42,16 @@ const LineChart = ({
   const theme = useTheme()
 
   return (
-    <Card className={styles.chartCard}>
-      <h3>
+    <div className={styles.chartCard}>
+      <Typography
+        component='h3'
+        variant='h6'
+        gutterBottom
+        sx={{ color: (theme) => theme.palette.text.primary }}
+      >
         {title} {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
-      </h3>
-      <div className={styles.chartContainer}>
+      </Typography>
+      <Card className={styles.chartContainer}>
         {!data ? (
           <Skeleton variant='rectangular' height={'100%'} animation='wave' />
         ) : (
@@ -60,8 +65,8 @@ const LineChart = ({
             xFormat='time:%b %d, %Y'
             yFormat={(value) => kFormatter(+value, 2)}
             margin={{
-              left: margin?.left || 67,
-              bottom: margin?.bottom || 40,
+              left: margin?.left || 60,
+              bottom: margin?.bottom || 45,
               top: margin?.top || 5,
               right: margin?.right || 80,
             }}
@@ -122,8 +127,8 @@ const LineChart = ({
             }}
           />
         )}
-      </div>
-    </Card>
+      </Card>
+    </div>
   )
 }
 

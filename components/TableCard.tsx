@@ -1,7 +1,6 @@
 import { useState, MouseEvent } from 'react'
 import {
   Card,
-  Skeleton,
   TableContainer,
   Table,
   TableHead,
@@ -9,12 +8,29 @@ import {
   TableRow,
   TableCell,
   TableSortLabel,
+  TableCellProps,
   IconButton,
+  Typography,
 } from '@mui/material'
 import { CallMade } from '@mui/icons-material'
 import { DelegateBalance } from '../lib/types/delegate'
 
 import styles from '../styles/Home.module.css'
+import Loading from './Loading'
+
+const TableHeadCell = ({ align, children }: TableCellProps) => (
+  <TableCell
+    align={align}
+    sx={{
+      textTransform: 'capitalize',
+      fontWeight: 'bold',
+      backgroundColor: (theme) =>
+        theme.palette.mode === 'light' ? '#FFFFFF' : '#1E1E1E',
+    }}
+  >
+    {children}
+  </TableCell>
+)
 
 type Props = {
   title: string
@@ -53,37 +69,27 @@ const TableCard = ({
     }
 
   return (
-    <Card className={styles.tableCard}>
-      <h3>{title}</h3>
-      {!delegates ? (
-        <>
-          <Skeleton animation='wave' height={65} />
-          <Skeleton animation='wave' height={65} />
-          <Skeleton animation='wave' height={65} />
-          <Skeleton animation='wave' height={65} />
-          <Skeleton animation='wave' height={65} />
-        </>
-      ) : (
-        <TableContainer sx={{ maxHeight: 'calc(100% - 50px)' }}>
+    <div className={styles.tableCard}>
+      <Typography
+        component='h3'
+        variant='h6'
+        gutterBottom
+        sx={{ color: (theme) => theme.palette.text.primary }}
+      >
+        {title}
+      </Typography>
+      <Card sx={{ height: 'calc(100% - 39px)' }}>
+        <TableContainer sx={{ maxHeight: '100%' }}>
           <Table stickyHeader size='small' aria-label={`${title} table`}>
+            <colgroup>
+              <col style={{ width: '50%' }} />
+              <col style={{ width: '25%' }} />
+              <col style={{ width: '25%' }} />
+            </colgroup>
             <TableHead>
               <TableRow>
-                <TableCell
-                  align='center'
-                  style={{
-                    textTransform: 'capitalize',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Delegate
-                </TableCell>
-                <TableCell
-                  align='center'
-                  style={{
-                    textTransform: 'capitalize',
-                    fontWeight: 'bold',
-                  }}
-                >
+                <TableHeadCell align='center'>Delegate</TableHeadCell>
+                <TableHeadCell align='center'>
                   <TableSortLabel
                     active={orderBy === 'delegatorCount'}
                     direction={orderBy === 'delegatorCount' ? order : 'desc'}
@@ -91,14 +97,8 @@ const TableCard = ({
                   >
                     Delegators
                   </TableSortLabel>
-                </TableCell>
-                <TableCell
-                  align='center'
-                  style={{
-                    textTransform: 'capitalize',
-                    fontWeight: 'bold',
-                  }}
-                >
+                </TableHeadCell>
+                <TableHeadCell align='center'>
                   <TableSortLabel
                     active={orderBy === 'lockTotal'}
                     direction={orderBy === 'lockTotal' ? order : 'desc'}
@@ -106,50 +106,63 @@ const TableCard = ({
                   >
                     MKR Delegated
                   </TableSortLabel>
-                </TableCell>
+                </TableHeadCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {delegates.map((delegate, i) => (
-                <TableRow hover key={i}>
-                  <TableCell align='left'>
-                    <span
-                      style={{ cursor: 'pointer' }}
-                      onClick={() =>
-                        setSelectedAddress(delegate.voteDelegate, delegate.name)
-                      }
-                    >
-                      {delegate.name ||
-                        delegate.voteDelegate.slice(0, 8) +
-                          '...' +
-                          delegate.voteDelegate.slice(38)}
-                    </span>
-                    <IconButton
-                      size='small'
-                      color='primary'
-                      aria-label='Etherscan delegate link'
-                      href={`https://etherscan.io/address/${delegate.voteDelegate}`}
-                      target='_blank'
-                    >
-                      <CallMade fontSize='inherit' />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell align='center'>
-                    {delegate.delegatorCount}
-                  </TableCell>
-                  <TableCell align='center'>
-                    {(+delegate.lockTotal > 999
-                      ? parseInt(delegate.lockTotal)
-                      : +parseFloat(delegate.lockTotal).toFixed(2)
-                    ).toLocaleString('en-US')}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {!delegates
+                ? Array.from(Array(8).keys()).map((key) => (
+                    <TableRow key={key}>
+                      {Array.from(Array(3).keys()).map((k) => (
+                        <TableCell key={k}>
+                          <Loading height={28} />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                : delegates.map((delegate, i) => (
+                    <TableRow hover key={i}>
+                      <TableCell align='left'>
+                        <span
+                          style={{ cursor: 'pointer' }}
+                          onClick={() =>
+                            setSelectedAddress(
+                              delegate.voteDelegate,
+                              delegate.name
+                            )
+                          }
+                        >
+                          {delegate.name ||
+                            delegate.voteDelegate.slice(0, 8) +
+                              '...' +
+                              delegate.voteDelegate.slice(38)}
+                        </span>
+                        <IconButton
+                          size='small'
+                          color='primary'
+                          aria-label='Etherscan delegate link'
+                          href={`https://etherscan.io/address/${delegate.voteDelegate}`}
+                          target='_blank'
+                        >
+                          <CallMade fontSize='inherit' />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell align='center'>
+                        {delegate.delegatorCount}
+                      </TableCell>
+                      <TableCell align='center'>
+                        {(+delegate.lockTotal > 999
+                          ? parseInt(delegate.lockTotal)
+                          : +parseFloat(delegate.lockTotal).toFixed(2)
+                        ).toLocaleString('en-US')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </TableContainer>
-      )}
-    </Card>
+      </Card>
+    </div>
   )
 }
 
