@@ -5,7 +5,7 @@ import {
   Gavel as GavelIcon,
 } from '@mui/icons-material'
 
-import { ExecutiveProposal } from '../../lib/types/tracker'
+import { Proposal } from '../../lib/types/tracker'
 
 enum IconType {
   forum = 'forum',
@@ -31,7 +31,7 @@ const FormattedIconButton = ({ type, href }: FormattedIconButtonProps) => (
 )
 
 type Props = {
-  proposal: ExecutiveProposal
+  proposal: Proposal
 }
 
 const ProposalIcons = ({ proposal }: Props) => {
