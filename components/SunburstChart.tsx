@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from 'react'
 import { ResponsiveSunburst } from '@nivo/sunburst'
-import { Card, Skeleton, useTheme } from '@mui/material'
+import { Card, Skeleton, useTheme, Typography } from '@mui/material'
 
 import styles from '../styles/Home.module.css'
 import { CenteredSunburstMetric } from './CenteredMetric'
@@ -26,11 +26,23 @@ const SunburstChart = ({
   const theme = useTheme()
 
   return (
-    <Card className={styles.chartCard}>
-      <h3>{title}</h3>
-      <div className={styles.chartContainer}>
+    <div className={styles.chartCard}>
+      <Typography
+        component='h3'
+        variant='h6'
+        gutterBottom
+        sx={{ color: (theme) => theme.palette.text.primary }}
+      >
+        {title}
+      </Typography>
+      <Card className={styles.pieChartContainer}>
         {!data ? (
-          <Skeleton variant='rectangular' height={'100%'} animation='wave' />
+          <Skeleton
+            variant='rectangular'
+            height={'calc(100% - 1.7em)'}
+            sx={{ mt: '1.7em' }}
+            animation='wave'
+          />
         ) : (
           <ResponsiveSunburst
             data={{
@@ -62,6 +74,7 @@ const SunburstChart = ({
             id='name'
             value='amount'
             theme={getTheme(theme)}
+            margin={{ top: 35, bottom: 10 }}
             borderWidth={1}
             borderColor={{ theme: 'background' }}
             colors={customColors}
@@ -109,8 +122,8 @@ const SunburstChart = ({
             layers={['arcs', 'arcLabels', CenteredSunburstMetric]}
           />
         )}
-      </div>
-    </Card>
+      </Card>
+    </div>
   )
 }
 

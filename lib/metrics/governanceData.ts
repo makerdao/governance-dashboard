@@ -1,7 +1,7 @@
 import { utils } from 'ethers'
-import { getContract } from './ethers'
-import { CHIEF_ADDRESS } from './contracts/addresses'
-import CHIEF_ABI from './contracts/abis/DSChief.json'
+import { getContract } from '../ethers'
+import { CHIEF_ADDRESS } from '../contracts/addresses'
+import CHIEF_ABI from '../contracts/abis/DSChief.json'
 import {
   DelegateObject,
   DelegationObject,
@@ -13,7 +13,7 @@ import {
   UserBalances,
   DelegateBalances,
   GroupedUserBalances,
-} from './types/delegate'
+} from '../types/delegate'
 
 export const getGovernanceData = async (): Promise<{
   topDelegates: DelegateBalance[]

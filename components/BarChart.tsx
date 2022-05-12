@@ -1,4 +1,4 @@
-import { Card, Skeleton, useTheme } from '@mui/material'
+import { Card, Skeleton, useTheme, Typography } from '@mui/material'
 import { ResponsiveBar } from '@nivo/bar'
 
 import styles from '../styles/Home.module.css'
@@ -14,9 +14,16 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
   const theme = useTheme()
 
   return (
-    <Card className={styles.chartCard}>
-      <h3>{title}</h3>
-      <div className={styles.chartContainer}>
+    <div className={styles.chartCard}>
+      <Typography
+        component='h3'
+        variant='h6'
+        gutterBottom
+        sx={{ color: (theme) => theme.palette.text.primary }}
+      >
+        {title}
+      </Typography>
+      <Card className={styles.chartContainer}>
         {!data ? (
           <Skeleton variant='rectangular' height={'100%'} animation='wave' />
         ) : (
@@ -25,7 +32,7 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
             colors='hsl(41, 90%, 57%)'
             keys={['uniqueVoters']}
             indexBy='month'
-            margin={{ left: 60, bottom: 40, top: 5, right: 50 }}
+            margin={{ left: 60, bottom: 45, top: 5, right: 50 }}
             padding={0.2}
             theme={getTheme(theme)}
             axisLeft={{
@@ -57,8 +64,8 @@ const BarChart = ({ title, data }: Props): JSX.Element => {
             )}
           />
         )}
-      </div>
-    </Card>
+      </Card>
+    </div>
   )
 }
 

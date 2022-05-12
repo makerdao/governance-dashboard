@@ -1,4 +1,4 @@
-import { Card, Skeleton } from '@mui/material'
+import { Card, CardContent, Skeleton, Typography } from '@mui/material'
 
 import styles from '../styles/Home.module.css'
 
@@ -14,23 +14,38 @@ type Props = {
 
 const DataCard = ({ data, title }: Props): JSX.Element => {
   return (
-    <Card className={styles.infoCard}>
-      <h3>{title}</h3>
-      {!data ? (
-        <>
-          <Skeleton animation='wave' height={80} />
-        </>
-      ) : (
-        <div className={styles.infoCardContainer}>
-          {data.map(({ name, value }, index) => (
-            <div key={index} className={styles.thirdWidth}>
-              <p className={styles.infoCardValue}> {value}</p>
-              <p className={styles.infoCardLabel}>{name}</p>
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
+    <div className={styles.infoCard}>
+      <Typography
+        component='h3'
+        variant='h6'
+        gutterBottom
+        sx={{ color: (theme) => theme.palette.text.primary }}
+      >
+        {title}
+      </Typography>
+      <Card sx={{ height: 'calc(100% - 39px)' }}>
+        <CardContent style={{ padding: '0.8em', height: '100%' }}>
+          <div className={styles.infoCardContainer}>
+            {!data
+              ? Array.from(Array(3).keys()).map((key) => (
+                  <div
+                    key={key}
+                    className={styles.thirdWidth}
+                    style={{ padding: '0 0.2em' }}
+                  >
+                    <Skeleton animation='wave' height={60} />
+                  </div>
+                ))
+              : data.map(({ name, value }, index) => (
+                  <div key={index} className={styles.thirdWidth}>
+                    <p className={styles.infoCardValue}> {value}</p>
+                    <p className={styles.infoCardLabel}>{name}</p>
+                  </div>
+                ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

@@ -1,5 +1,13 @@
+import { Dispatch, SetStateAction } from 'react'
 import { ResponsivePie } from '@nivo/pie'
-import { Card, Skeleton, useTheme } from '@mui/material'
+import {
+  Card,
+  Skeleton,
+  useTheme,
+  Typography,
+  Button,
+  Box,
+} from '@mui/material'
 
 import InfoTooltip from './InfoTooltip'
 import styles from '../styles/Home.module.css'
@@ -12,24 +20,61 @@ type Props = {
   title: string
   data: { id: string; value: number }[] | undefined
   infoTooltipText?: string
+  backToNow: boolean
+  setSelectedTime: Dispatch<SetStateAction<number | null>>
 }
 
-const PieChart = ({ title, data, infoTooltipText }: Props): JSX.Element => {
+const PieChart = ({
+  title,
+  data,
+  infoTooltipText,
+  backToNow,
+  setSelectedTime,
+}: Props): JSX.Element => {
   const theme = useTheme()
 
   return (
-    <Card className={styles.chartCard}>
-      <h3>
-        {title} {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
-      </h3>
-      <div className={styles.chartContainer}>
+    <div className={styles.chartCard}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Typography
+          component='h3'
+          variant='h6'
+          gutterBottom
+          sx={{ color: (theme) => theme.palette.text.primary }}
+        >
+          {title}{' '}
+          {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
+        </Typography>
+        {backToNow && (
+          <Button
+            size='small'
+            variant='outlined'
+            sx={{ py: 0 }}
+            onClick={() => setSelectedTime(null)}
+          >
+            Back to Now
+          </Button>
+        )}
+      </Box>
+      <Card className={styles.pieChartContainer}>
         {!data ? (
-          <Skeleton variant='rectangular' height={'100%'} animation='wave' />
+          <Skeleton
+            variant='rectangular'
+            height={'calc(100% - 1.7em)'}
+            sx={{ mt: '1.7em' }}
+            animation='wave'
+          />
         ) : (
           <ResponsivePie
             data={data}
             valueFormat={(value) => kFormatter(+value, 2)}
-            margin={{ top: 30, bottom: 30 }}
+            margin={{ top: 40, bottom: 25 }}
             innerRadius={0.6}
             cornerRadius={3}
             sortByValue={true}
@@ -81,8 +126,8 @@ const PieChart = ({ title, data, infoTooltipText }: Props): JSX.Element => {
             ]}
           />
         )}
-      </div>
-    </Card>
+      </Card>
+    </div>
   )
 }
 
