@@ -61,6 +61,15 @@
   gap: 1rem;
 }
 
+.delegatesSection {
+  height: calc(100vh - 129px);
+  margin-top: 4em;
+  padding: 1.5rem 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .overviewContainer {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
