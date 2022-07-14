@@ -29,8 +29,9 @@ const getForumComments = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const postsForumResBody = await postsForumRes.json()
 
-    const forumComments = postsForumResBody.post_stream.posts.map(
-      (post: any) => ({
+    const forumComments = postsForumResBody.post_stream.posts
+      .filter((post: any) => delegatePlatform.members.includes(post.username))
+      .map((post: any) => ({
         commentType: 'forum',
         username: post.username,
         comment: post.cooked,
@@ -40,8 +41,7 @@ const getForumComments = async (req: NextApiRequest, res: NextApiResponse) => {
           '{size}',
           '45'
         )}`,
-      })
-    )
+      }))
 
     res.status(200).json(forumComments.reverse())
   } catch (err) {

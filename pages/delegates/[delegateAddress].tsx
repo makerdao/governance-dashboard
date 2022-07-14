@@ -50,12 +50,21 @@ const DelegateProfilePage = () => {
       ? true
       : comment.commentType === selectedCommentType
 
-  const filterSearch = (comment: ProposalComment) => {
-    if (mainSearch === '') return true
-    else {
-      return comment.comment.toLowerCase().includes(mainSearch.toLowerCase())
-    }
-  }
+  const filterSearch = (comment: ProposalComment) =>
+    mainSearch === ''
+      ? true
+      : comment.comment.toLowerCase().includes(mainSearch.toLowerCase()) ||
+        (comment.commentType === 'onChain' &&
+          `${comment.voteType} ${comment.id}`
+            .toLowerCase()
+            .includes(mainSearch.toLowerCase())) ||
+        new Date(comment.date)
+          .toDateString()
+          .toLowerCase()
+          .includes(mainSearch.toLowerCase())
+
+  const filteredDelegateComments =
+    delegate?.comments?.filter(filterComments).filter(filterSearch) || []
 
   return (
     <Box sx={{ height: '100%' }}>
@@ -188,66 +197,76 @@ const DelegateProfilePage = () => {
           >
             {!delegate.comments ? (
               <DelegateCommentLoading />
+            ) : !filteredDelegateComments.length ? (
+              <Typography
+                fontSize={18}
+                sx={{ color: (theme) => theme.palette.text.primary }}
+              >
+                No{' '}
+                {selectedCommentType === 'all'
+                  ? 'forum posts or on-chain comments'
+                  : selectedCommentType === 'forum'
+                  ? 'forum posts'
+                  : 'on-chain comments'}{' '}
+                found for this delegate
+              </Typography>
             ) : (
-              delegate.comments
-                .filter(filterComments)
-                .filter(filterSearch)
-                .map((comment, idx) => (
-                  <Card
-                    key={idx}
-                    sx={{
-                      flexShrink: 0,
-                      pb: comment.commentType === 'forum' ? 0 : 1.5,
+              filteredDelegateComments.map((comment, idx) => (
+                <Card
+                  key={idx}
+                  sx={{
+                    flexShrink: 0,
+                    pb: comment.commentType === 'forum' ? 0 : 1.5,
+                  }}
+                >
+                  <CardHeader
+                    avatar={
+                      <Avatar
+                        sx={{ bgcolor: '#1aab9b' }}
+                        alt='Profile avatar'
+                        src={comment.avatarUrl}
+                      />
+                    }
+                    title={comment.username}
+                    titleTypographyProps={{
+                      fontSize: '1.4em',
+                      fontWeight: 'bold',
                     }}
-                  >
-                    <CardHeader
-                      avatar={
-                        <Avatar
-                          sx={{ bgcolor: '#1aab9b' }}
-                          alt='Profile avatar'
-                          src={comment.avatarUrl}
-                        />
-                      }
-                      title={comment.username}
-                      titleTypographyProps={{
-                        fontSize: '1.4em',
-                        fontWeight: 'bold',
-                      }}
-                      subheader={
-                        <>
-                          <MuiLink
-                            href={comment.url}
-                            underline='none'
-                            target='_blank'
-                          >
-                            {comment.commentType === 'forum'
-                              ? 'Forum post'
-                              : 'On-chain comment'}{' '}
-                            <CallMade fontSize='inherit' />
-                          </MuiLink>{' '}
-                          {comment.commentType === 'onChain'
-                            ? `| ${comment.voteType} ${
-                                typeof comment.id !== 'string'
-                                  ? comment.id
-                                  : comment.id.slice(0, 6) +
-                                    '...' +
-                                    comment.id.slice(-4)
-                              } |`
-                            : '|'}{' '}
-                          {new Date(comment.date).toDateString()}
-                        </>
-                      }
-                      subheaderTypographyProps={{ fontWeight: 'bold' }}
-                    />
-                    <Divider />
-                    <CardContent
-                      sx={{ pt: 0, py: '0.5em !important' }}
-                      dangerouslySetInnerHTML={{
-                        __html: sanitize(comment.comment),
-                      }}
-                    ></CardContent>
-                  </Card>
-                ))
+                    subheader={
+                      <>
+                        <MuiLink
+                          href={comment.url}
+                          underline='none'
+                          target='_blank'
+                        >
+                          {comment.commentType === 'forum'
+                            ? 'Forum post'
+                            : 'On-chain comment'}{' '}
+                          <CallMade fontSize='inherit' />
+                        </MuiLink>{' '}
+                        {comment.commentType === 'onChain'
+                          ? `| ${comment.voteType} ${
+                              typeof comment.id !== 'string'
+                                ? comment.id
+                                : comment.id.slice(0, 6) +
+                                  '...' +
+                                  comment.id.slice(-4)
+                            } |`
+                          : '|'}{' '}
+                        {new Date(comment.date).toDateString()}
+                      </>
+                    }
+                    subheaderTypographyProps={{ fontWeight: 'bold' }}
+                  />
+                  <Divider />
+                  <CardContent
+                    sx={{ pt: 0, py: '0.5em !important' }}
+                    dangerouslySetInnerHTML={{
+                      __html: sanitize(comment.comment),
+                    }}
+                  ></CardContent>
+                </Card>
+              ))
             )}
           </Stack>
         </Box>
