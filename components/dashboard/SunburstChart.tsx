@@ -2,28 +2,22 @@ import { Dispatch, SetStateAction } from 'react'
 import { ResponsiveSunburst } from '@nivo/sunburst'
 import { Card, Skeleton, useTheme, Typography } from '@mui/material'
 
-import styles from '../styles/Home.module.css'
+import styles from '../../styles/Home.module.css'
 import { CenteredSunburstMetric } from './CenteredMetric'
-import { GroupedUserBalances } from '../lib/types/delegate'
-import { kFormatter } from '../lib/helpers'
-import getTheme from '../lib/nivo/theme'
+import { GroupedUserBalances } from '../../lib/types/delegate'
+import { kFormatter } from '../../lib/helpers'
+import getTheme from '../../lib/nivo/theme'
+import { useDashboard } from '../../context/DashboardContext'
 
 type Props = {
   title: string
   data: GroupedUserBalances | undefined
   customColors: string[]
-  setSelectedAddress: Dispatch<SetStateAction<string | null>>
-  setSelectedDelegate: Dispatch<SetStateAction<string | null>>
 }
 
-const SunburstChart = ({
-  title,
-  data,
-  customColors,
-  setSelectedAddress,
-  setSelectedDelegate,
-}: Props): JSX.Element => {
+const SunburstChart = ({ title, data, customColors }: Props): JSX.Element => {
   const theme = useTheme()
+  const { setSelectedAddress, setSelectedDelegate } = useDashboard()
 
   return (
     <div className={styles.chartCard}>
@@ -47,25 +41,32 @@ const SunburstChart = ({
           <ResponsiveSunburst
             data={{
               name: 'vote weights',
+              label: 'vote weights',
               children: [
                 {
                   name: 'Recognized delegates',
+                  label: 'Recognized delegates',
                   children: data.recognizedDelegates.map((usr) => ({
-                    name: usr.name,
+                    name: usr.address,
+                    label: usr.name,
                     amount: usr.amount,
                   })),
                 },
                 {
                   name: 'Shadow delegates',
+                  label: 'Shadow delegates',
                   children: data.shadowDelegates.map((usr) => ({
                     name: usr.address,
+                    label: usr.address,
                     amount: usr.amount,
                   })),
                 },
                 {
                   name: 'Users',
+                  label: 'Users',
                   children: data.users.map((usr) => ({
                     name: usr.address,
+                    label: usr.address,
                     amount: usr.amount,
                   })),
                 },
@@ -92,12 +93,12 @@ const SunburstChart = ({
                   style={{ backgroundColor: datum.color }}
                 ></span>
                 <span>
-                  {datum.data.name.length === 42 &&
-                  datum.data.name.startsWith('0x')
-                    ? datum.data.name.slice(0, 12) +
+                  {datum.data.label.length === 42 &&
+                  datum.data.label.startsWith('0x')
+                    ? datum.data.label.slice(0, 12) +
                       '...' +
-                      datum.data.name.slice(38)
-                    : datum.data.name}
+                      datum.data.label.slice(38)
+                    : datum.data.label}
                   :{' '}
                   <b>
                     {kFormatter(datum.value, 2)} MKR | {datum.formattedValue}
@@ -109,7 +110,7 @@ const SunburstChart = ({
               if (slice.depth !== 2) return
               if (slice.path[1] === 'Recognized delegates') {
                 const foundDelegate = data.recognizedDelegates.find(
-                  (del) => del.name === slice.id
+                  (del) => del.address === slice.id
                 )
                 if (!foundDelegate) return
                 setSelectedAddress(foundDelegate.address)

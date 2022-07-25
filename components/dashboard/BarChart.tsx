@@ -1,9 +1,9 @@
 import { Card, Skeleton, useTheme, Typography } from '@mui/material'
 import { ResponsiveBar } from '@nivo/bar'
 
-import styles from '../styles/Home.module.css'
-import { PollVotersData } from '../lib/types/delegate'
-import getTheme from '../lib/nivo/theme'
+import styles from '../../styles/Home.module.css'
+import { PollVotersData } from '../../lib/types/delegate'
+import getTheme from '../../lib/nivo/theme'
 
 type Props = {
   title: string

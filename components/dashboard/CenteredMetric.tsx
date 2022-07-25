@@ -2,7 +2,7 @@ import { PieCustomLayerProps } from '@nivo/pie'
 import { SunburstCustomLayerProps } from '@nivo/sunburst'
 import { useTheme } from '@mui/material'
 
-import { kFormatter } from '../lib/helpers'
+import { kFormatter } from '../../lib/helpers'
 
 interface RawSunburstDatum {
   name: string

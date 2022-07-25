@@ -2,11 +2,12 @@ import { Dispatch, SetStateAction } from 'react'
 import { Serie, ResponsiveLine } from '@nivo/line'
 import { Card, Skeleton, useTheme, Typography } from '@mui/material'
 
-import InfoTooltip from './InfoTooltip'
-import styles from '../styles/Home.module.css'
-import { kFormatter, kFormatterInt } from '../lib/helpers'
-import getTheme from '../lib/nivo/theme'
-import { mkrPalette, mkrPaletteMain } from '../lib/nivo/colors'
+import InfoTooltip from '../../InfoTooltip'
+import styles from '../../../styles/Home.module.css'
+import { kFormatter, kFormatterInt } from '../../../lib/helpers'
+import getTheme from '../../../lib/nivo/theme'
+import { mkrPalette, mkrPaletteMain } from '../../../lib/nivo/colors'
+import { useDashboard } from '../../../context/DashboardContext'
 
 type Props = {
   data: Serie[] | undefined
@@ -39,7 +40,18 @@ const LineChart = ({
   enableLegend = true,
   infoTooltipText,
 }: Props): JSX.Element => {
+  const { selectedStartDate, selectedEndDate } = useDashboard()
   const theme = useTheme()
+
+  const chartData = data?.map((serie) => ({
+    ...serie,
+    data: serie.data.filter(
+      ({ x }) =>
+        x &&
+        (selectedStartDate ? x >= new Date(selectedStartDate) : true) &&
+        (selectedEndDate ? x <= new Date(selectedEndDate) : true)
+    ),
+  }))
 
   return (
     <div className={styles.chartCard}>
@@ -52,11 +64,11 @@ const LineChart = ({
         {title} {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
       </Typography>
       <Card className={styles.chartContainer}>
-        {!data ? (
+        {!chartData ? (
           <Skeleton variant='rectangular' height={'100%'} animation='wave' />
         ) : (
           <ResponsiveLine
-            data={data}
+            data={chartData}
             xScale={{
               type: 'time',
               format: '%Y-%m-%dT%H:%M:%SZ',
@@ -103,7 +115,7 @@ const LineChart = ({
               )
             }}
             legends={
-              data.length === 1 || !enableLegend
+              chartData.length === 1 || !enableLegend
                 ? []
                 : [
                     {

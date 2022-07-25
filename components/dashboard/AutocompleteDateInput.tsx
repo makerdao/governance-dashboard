@@ -1,6 +1,6 @@
 import { Autocomplete, TextField } from '@mui/material'
 
-import { UserBalances } from '../lib/types/delegate'
+import { UserBalances } from '../../lib/types/delegate'
 
 type Props = {
   mkrBalancesData: void | UserBalances[] | undefined
@@ -29,7 +29,7 @@ const AutocompleteDateInput = ({
         setSelectedDate(newDate)
       }}
       options={dateData || []}
-      sx={{ width: 120 }}
+      sx={{ width: 155 }}
       clearOnEscape
       size='small'
       renderInput={(params) => <TextField {...params} label={label} />}

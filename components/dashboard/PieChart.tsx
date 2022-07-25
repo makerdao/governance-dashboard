@@ -1,4 +1,3 @@
-import { Dispatch, SetStateAction } from 'react'
 import { ResponsivePie } from '@nivo/pie'
 import {
   Card,
@@ -9,29 +8,35 @@ import {
   Box,
 } from '@mui/material'
 
-import InfoTooltip from './InfoTooltip'
-import styles from '../styles/Home.module.css'
+import InfoTooltip from '../InfoTooltip'
+import styles from '../../styles/Home.module.css'
 import { CenteredPieMetric } from './CenteredMetric'
-import { kFormatter } from '../lib/helpers'
-import getTheme from '../lib/nivo/theme'
-import { mkrPalette } from '../lib/nivo/colors'
+import { kFormatter } from '../../lib/helpers'
+import getTheme from '../../lib/nivo/theme'
+import { mkrPalette } from '../../lib/nivo/colors'
+import { useDashboard } from '../../context/DashboardContext'
+import { DelegateBalances } from '../../lib/types/delegate'
 
 type Props = {
-  title: string
-  data: { id: string; value: number }[] | undefined
-  infoTooltipText?: string
-  backToNow: boolean
-  setSelectedTime: Dispatch<SetStateAction<number | null>>
+  data: DelegateBalances[] | undefined
 }
 
-const PieChart = ({
-  title,
-  data,
-  infoTooltipText,
-  backToNow,
-  setSelectedTime,
-}: Props): JSX.Element => {
+const PieChart = ({ data }: Props): JSX.Element => {
   const theme = useTheme()
+  const { selectedTime, setSelectedTime } = useDashboard()
+
+  const chartData = data
+    ?.find((elem, idx, array) =>
+      selectedTime
+        ? elem.time.getTime() === selectedTime
+        : idx === array.length - 1
+    )
+    ?.balances.filter((del) => del.amount > 0)
+    .map((del) => ({
+      id: del.address,
+      label: del.name || del.address,
+      value: del.amount,
+    }))
 
   return (
     <div className={styles.chartCard}>
@@ -48,10 +53,14 @@ const PieChart = ({
           gutterBottom
           sx={{ color: (theme) => theme.palette.text.primary }}
         >
-          {title}{' '}
-          {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
+          All Delegates Vote Weights at selected time -
+          {selectedTime ? new Date(selectedTime).toLocaleDateString() : 'now'}{' '}
+          <InfoTooltip
+            text='You can select the time by clicking on a data point on the Recognized
+          Delegates Vote Weights chart'
+          />
         </Typography>
-        {backToNow && (
+        {selectedTime && (
           <Button
             size='small'
             variant='outlined'
@@ -63,7 +72,7 @@ const PieChart = ({
         )}
       </Box>
       <Card className={styles.pieChartContainer}>
-        {!data ? (
+        {!chartData ? (
           <Skeleton
             variant='rectangular'
             height={'calc(100% - 1.7em)'}
@@ -72,7 +81,7 @@ const PieChart = ({
           />
         ) : (
           <ResponsivePie
-            data={data}
+            data={chartData}
             valueFormat={(value) => kFormatter(+value, 2)}
             margin={{ top: 40, bottom: 25 }}
             innerRadius={0.6}
@@ -91,9 +100,12 @@ const PieChart = ({
             arcLinkLabelsColor={{ from: 'color' }}
             arcLabelsSkipAngle={15}
             arcLinkLabel={(datum) =>
-              datum.data.id.length === 42 && datum.data.id.startsWith('0x')
-                ? datum.data.id.slice(0, 12) + '...' + datum.data.id.slice(38)
-                : datum.data.id
+              datum.data.label.length === 42 &&
+              datum.data.label.startsWith('0x')
+                ? datum.data.label.slice(0, 12) +
+                  '...' +
+                  datum.data.label.slice(38)
+                : datum.data.label
             }
             tooltip={(datum) => (
               <Card className={styles.chartTooltip}>
@@ -102,12 +114,12 @@ const PieChart = ({
                   style={{ backgroundColor: datum.datum.color }}
                 ></span>
                 <span>
-                  {datum.datum.data.id.length === 42 &&
-                  datum.datum.data.id.startsWith('0x')
-                    ? datum.datum.data.id.slice(0, 12) +
+                  {datum.datum.data.label.length === 42 &&
+                  datum.datum.data.label.startsWith('0x')
+                    ? datum.datum.data.label.slice(0, 12) +
                       '...' +
-                      datum.datum.data.id.slice(38)
-                    : datum.datum.data.id}
+                      datum.datum.data.label.slice(38)
+                    : datum.datum.data.label}
                   :{' '}
                   <b>
                     {datum.datum.formattedValue} MKR |{' '}
