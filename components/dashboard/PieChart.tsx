@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { FullScreen, useFullScreenHandle } from 'react-full-screen'
 import { ResponsivePie } from '@nivo/pie'
 import {
   Card,
@@ -7,7 +8,9 @@ import {
   Typography,
   Button,
   Box,
+  IconButton,
 } from '@mui/material'
+import { Fullscreen, FullscreenExit } from '@mui/icons-material'
 
 import InfoTooltip from './InfoTooltip'
 import styles from '../../styles/Home.module.css'
@@ -25,6 +28,7 @@ type Props = {
 const PieChart = ({ data }: Props): JSX.Element => {
   const theme = useTheme()
   const { selectedTime, setSelectedTime } = useDashboard()
+  const handle = useFullScreenHandle()
 
   return useMemo(() => {
     const chartData = data
@@ -41,12 +45,16 @@ const PieChart = ({ data }: Props): JSX.Element => {
       }))
 
     return (
-      <div className={styles.chartCard}>
+      <FullScreen handle={handle} className={styles.chartCard}>
         <Box
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
+            backgroundColor: !handle.active
+              ? ''
+              : (theme) => theme.palette.background.paper,
+            px: handle.active ? 2 : 0,
           }}
         >
           <Typography
@@ -62,16 +70,21 @@ const PieChart = ({ data }: Props): JSX.Element => {
           Delegates Vote Weights chart'
             />
           </Typography>
-          {selectedTime && (
-            <Button
-              size='small'
-              variant='outlined'
-              sx={{ py: 0 }}
-              onClick={() => setSelectedTime(null)}
-            >
-              Back to Now
-            </Button>
-          )}
+          <Box>
+            {selectedTime && (
+              <Button
+                size='small'
+                variant='outlined'
+                sx={{ py: 0 }}
+                onClick={() => setSelectedTime(null)}
+              >
+                Back to Now
+              </Button>
+            )}
+            <IconButton onClick={handle.active ? handle.exit : handle.enter}>
+              {handle.active ? <FullscreenExit /> : <Fullscreen />}
+            </IconButton>
+          </Box>
         </Box>
         <Card className={styles.pieChartContainer}>
           {!chartData ? (
@@ -143,9 +156,9 @@ const PieChart = ({ data }: Props): JSX.Element => {
             />
           )}
         </Card>
-      </div>
+      </FullScreen>
     )
-  }, [data, selectedTime, setSelectedTime, theme])
+  }, [data, selectedTime, setSelectedTime, theme, handle])
 }
 
 export default PieChart

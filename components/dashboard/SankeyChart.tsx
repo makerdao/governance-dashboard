@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { FullScreen, useFullScreenHandle } from 'react-full-screen'
 import { ResponsiveSankey } from '@nivo/sankey'
 import {
   Card,
@@ -7,7 +8,9 @@ import {
   Typography,
   Button,
   Box,
+  IconButton,
 } from '@mui/material'
+import { Fullscreen, FullscreenExit } from '@mui/icons-material'
 
 import InfoTooltip from './InfoTooltip'
 import styles from '../../styles/Home.module.css'
@@ -30,6 +33,7 @@ const SankeyChart = ({
   recognizedDelegates,
 }: Props): JSX.Element => {
   const theme = useTheme()
+  const handle = useFullScreenHandle()
   const [chartData, setChartData] = useState<
     { nodes: any[]; links: any[] } | undefined
   >()
@@ -40,12 +44,16 @@ const SankeyChart = ({
   }, [data])
 
   return (
-    <div className={styles.chartCard}>
+    <FullScreen handle={handle} className={styles.chartCard}>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          backgroundColor: !handle.active
+            ? ''
+            : (theme) => theme.palette.background.paper,
+          px: handle.active ? 2 : 0,
         }}
       >
         <Typography
@@ -57,19 +65,24 @@ const SankeyChart = ({
           {title}
           {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
         </Typography>
-        {isFiltered && (
-          <Button
-            size='small'
-            variant='outlined'
-            sx={{ py: 0 }}
-            onClick={() => {
-              setChartData(data)
-              setIsFiltered(false)
-            }}
-          >
-            Reset View
-          </Button>
-        )}
+        <Box>
+          {isFiltered && (
+            <Button
+              size='small'
+              variant='outlined'
+              sx={{ py: 0 }}
+              onClick={() => {
+                setChartData(data)
+                setIsFiltered(false)
+              }}
+            >
+              Reset View
+            </Button>
+          )}
+          <IconButton onClick={handle.active ? handle.exit : handle.enter}>
+            {handle.active ? <FullscreenExit /> : <Fullscreen />}
+          </IconButton>
+        </Box>
       </Box>
       <Card className={styles.pieChartContainer}>
         {!chartData || !recognizedDelegates ? (
@@ -160,7 +173,7 @@ const SankeyChart = ({
           />
         )}
       </Card>
-    </div>
+    </FullScreen>
   )
 }
 
