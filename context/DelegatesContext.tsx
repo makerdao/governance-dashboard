@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
 } from 'react'
+import { useRouter } from 'next/router'
 import useSWRImmutable from 'swr/immutable'
 
 interface OnChainComment {
@@ -66,12 +67,16 @@ type PropTypes = {
 export const useDelegates = () => useContext(DelegatesContext)
 
 export const DelegatesProvider = ({ children }: PropTypes): ReactElement => {
+  const router = useRouter()
   const [delegatesData, setDelegatesData] = useState<DelegateData[]>([])
 
   const fetcher = (endpoint: string) =>
     fetch(endpoint).then((res) => res.json())
   const { data: rawDelegatesData } = useSWRImmutable(
-    'https://vote.makerdao.com/api/delegates/names',
+    () =>
+      router.route.startsWith('/delegates')
+        ? 'https://vote.makerdao.com/api/delegates/names'
+        : null,
     fetcher
   )
 

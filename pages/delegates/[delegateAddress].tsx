@@ -37,6 +37,7 @@ const DelegateProfilePage = () => {
     (del) => del.voteDelegateAddress === delegateAddress
   )
 
+  if (!delegatesData.length) return null
   if (!delegate)
     return (
       <ErrorPage statusCode={404} title='Error fetching delegate information' />

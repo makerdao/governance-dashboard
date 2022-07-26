@@ -8,6 +8,7 @@ import {
   SetStateAction,
   Dispatch,
 } from 'react'
+import { useRouter } from 'next/router'
 import useSWRImmutable from 'swr/immutable'
 import { DateTime } from 'luxon'
 
@@ -46,6 +47,7 @@ type PropTypes = {
 export const useTracker = () => useContext(TrackerContext)
 
 export const TrackerProvider = ({ children }: PropTypes): ReactElement => {
+  const router = useRouter()
   const [executiveProposals, setExecutiveProposals] = useState<Proposals>()
   const [onChainPolls, setOnChainPolls] = useState<Proposals>()
   const [offChainPolls, setOffChainPolls] = useState<Proposals>()
@@ -60,7 +62,8 @@ export const TrackerProvider = ({ children }: PropTypes): ReactElement => {
   const fetcher = (endpoint: string) =>
     fetch(endpoint).then((res) => res.json())
   const { data: proposalsData } = useSWRImmutable(
-    '/api/tracker/proposals',
+    () =>
+      router.route.startsWith('/tracker') ? '/api/tracker/proposals' : null,
     fetcher
   )
   const { data: archiveData } = useSWRImmutable(
