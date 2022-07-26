@@ -97,7 +97,15 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                   <Box sx={{ display: 'flex', gap: '0.5em' }}>
                     <div className={styles.navigationContainer}>
                       <Link href='/' passHref>
-                        <Typography>Stats</Typography>
+                        <Typography
+                          color={
+                            router.route === '/'
+                              ? (theme) => theme.palette.primary.main
+                              : ''
+                          }
+                        >
+                          Stats
+                        </Typography>
                       </Link>
                       <Divider
                         orientation='vertical'
@@ -105,7 +113,15 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                         variant='middle'
                       />
                       <Link href='/tracker' passHref>
-                        <Typography>Tracker</Typography>
+                        <Typography
+                          color={
+                            router.route.startsWith('/tracker')
+                              ? (theme) => theme.palette.primary.main
+                              : ''
+                          }
+                        >
+                          Tracker
+                        </Typography>
                       </Link>
                       <Divider
                         orientation='vertical'
@@ -113,7 +129,15 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                         variant='middle'
                       />
                       <Link href='/delegates' passHref>
-                        <Typography>Delegates</Typography>
+                        <Typography
+                          color={
+                            router.route.startsWith('/delegates')
+                              ? (theme) => theme.palette.primary.main
+                              : ''
+                          }
+                        >
+                          Delegates
+                        </Typography>
                       </Link>
                     </div>
 
@@ -226,11 +250,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                     : 0,
                 }}
               >
-                <Component
-                  {...pageProps}
-                  toggleMode={toggleMode}
-                  theme={theme}
-                />
+                <Component {...pageProps} />
               </Box>
 
               <Box
