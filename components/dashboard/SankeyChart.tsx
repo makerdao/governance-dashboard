@@ -9,7 +9,7 @@ import {
   Box,
 } from '@mui/material'
 
-import InfoTooltip from '../InfoTooltip'
+import InfoTooltip from './InfoTooltip'
 import styles from '../../styles/Home.module.css'
 import { kFormatter } from '../../lib/helpers'
 import getTheme from '../../lib/nivo/theme'
@@ -54,7 +54,7 @@ const SankeyChart = ({
           gutterBottom
           sx={{ color: (theme) => theme.palette.text.primary }}
         >
-          {title}{' '}
+          {title}
           {infoTooltipText ? <InfoTooltip text={infoTooltipText} /> : ''}
         </Typography>
         {isFiltered && (
