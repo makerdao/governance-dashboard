@@ -367,29 +367,42 @@ export const getStakedMkr = async (): Promise<{
 
   const blockNumbersSet = new Set(stakeEvents.map((event) => event.blockNumber))
 
-  const query = `{
-    blocks(first: 1000 where: {number_in: [${Array.from(blockNumbersSet)}]}) {
-      number
-      timestamp
-    }
-  }`
-
-  const res = await fetch(
-    'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
-    {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    }
-  )
-
-  const data = await res.json()
-  const blockRes: { number: string; timestamp: string }[] = data.data.blocks
+  let first = 1000
+  let skip = 0
+  let total = 0
   const blocksMap: Map<number, string> = new Map()
-  blockRes.forEach((block) => blocksMap.set(+block.number, block.timestamp))
+
+  while (total < blockNumbersSet.size) {
+    const query = `{
+      blocks(first: ${first} skip: ${skip} where: {number_in: [${Array.from(
+      blockNumbersSet
+    )}]}) {
+        number
+        timestamp
+      }
+    }`
+
+    const res = await fetch(
+      'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      }
+    )
+
+    const data = await res.json()
+    const blockRes: { number: string; timestamp: string }[] = data.data.blocks
+    blockRes.forEach((block) => blocksMap.set(+block.number, block.timestamp))
+
+    total += first
+    skip += total
+    first =
+      blockNumbersSet.size - total < 1000 ? blockNumbersSet.size - total : 1000
+  }
 
   const mkrStakedData: MkrStakedData[] = []
 
