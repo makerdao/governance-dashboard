@@ -1,5 +1,6 @@
 import { MkrStakedData, MkrDelegatedData } from '../../../lib/types/delegate'
 import LineChart from './LineChart'
+import styles from '../../../styles/Home.module.css'
 
 type Props = {
   mkrStakedData: MkrStakedData[] | undefined
@@ -9,6 +10,7 @@ type Props = {
 const TotalMkrLineChart = ({ mkrStakedData, mkrDelegatedData }: Props) => {
   return (
     <LineChart
+      chartClass={styles.largeChartCard}
       data={
         mkrStakedData &&
         mkrDelegatedData && [
