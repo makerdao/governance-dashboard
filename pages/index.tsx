@@ -73,7 +73,10 @@ const Home = () => {
         title='Top Recognized Delegates'
         delegates={recognizedDelegates}
       />
-      <TableCard title='Top Shadow Delegates' delegates={shadowDelegates} />
+      <SankeyChart
+        data={governanceData?.sankeyData}
+        recognizedDelegates={recognizedDelegates}
+      />
       <DataCard
         title='Delegates count'
         type='delegates-count'
@@ -89,6 +92,11 @@ const Home = () => {
         type='delegators-count'
         data={governanceData && governanceData.topDelegates}
       />
+      <TableCard title='Top Shadow Delegates' delegates={shadowDelegates} />
+      <TotalMkrLineChart
+        mkrStakedData={stakedMkrData?.mkrStakedData}
+        mkrDelegatedData={governanceData?.mkrDelegatedData}
+      />
       <SunburstChart
         title='Current Vote Weights for all users'
         data={groupedBalancesData}
@@ -99,24 +107,14 @@ const Home = () => {
         ]}
       />
       <IndividualMkrLineChart data={mkrBalancesData} />
-      <TotalMkrLineChart
-        mkrStakedData={stakedMkrData?.mkrStakedData}
-        mkrDelegatedData={governanceData?.mkrDelegatedData}
-      />
-      <BarChart
-        title='Average Unique Voters per poll per month'
-        data={pollVotersData}
-      />
       <DelegateWeightsLineChart
         recognizedDelegates={recognizedDelegates}
         delegatesBalancesData={delegatesBalancesData}
       />
       <PieChart data={delegatesBalancesData} />
-      <SankeyChart
-        title='MKR delegation'
-        infoTooltipText='Click on a delegator or delegate to render the specific chart'
-        data={governanceData?.sankeyData}
-        recognizedDelegates={recognizedDelegates}
+      <BarChart
+        title='Average Unique Voters per poll per month'
+        data={pollVotersData}
       />
     </>
   )
