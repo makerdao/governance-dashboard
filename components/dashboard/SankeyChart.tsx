@@ -25,8 +25,6 @@ type Props = {
 }
 
 const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
-  console.log(data)
-  console.log(recognizedDelegates)
   const theme = useTheme()
   const handle = useFullScreenHandle()
   const [chartData, setChartData] = useState<
@@ -124,7 +122,6 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
               theme={{ ...getTheme(theme), fontSize: handle.active ? 15 : 11 }}
               colors={mkrPalette}
               label={({ id: nodeId, ...props }) => {
-                console.log({ nodeId, ...props })
                 if (nodeId === 'others') {
                   if (props.sourceLinks.length > 1) return 'others'
                   else {

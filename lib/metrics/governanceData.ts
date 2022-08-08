@@ -184,7 +184,7 @@ const getDelegations = async (): Promise<{
       )
       if (currentDelegate) {
         currentDelegate.name =
-          delegate.status === 'recognized' ? delegate.name : ''
+          delegate.name !== 'Shadow Delegate' ? delegate.name : ''
         currentDelegate.status = delegate.status
         currentDelegate.expired = delegate.expired
         currentDelegate.isAboutToExpire = delegate.isAboutToExpire
@@ -589,10 +589,6 @@ export const getGroupedBalances = async (
 ): Promise<GroupedUserBalances | undefined> => {
   if (!delegates || !mkrBalancesData) return undefined
 
-  const balancesArr = mkrBalancesData[mkrBalancesData.length - 1].balances
-    .filter((bal) => bal.amount >= 0.01)
-    .sort((a, b) => b.amount - a.amount)
-
   const recognizedDelegatesMap = new Map<string, string>()
 
   const recognizedDelegates = delegates
@@ -605,6 +601,16 @@ export const getGroupedBalances = async (
   const shadowDelegates = delegates
     .filter((del) => del.status === 'shadow')
     .map((del) => del.voteDelegate)
+
+  const expiredDelegates = delegates
+    .filter((del) => del.expired)
+    .map((del) => del.voteDelegate)
+
+  const balancesArr = mkrBalancesData[mkrBalancesData.length - 1].balances
+    .filter(
+      (bal) => bal.amount >= 0.01 && !expiredDelegates.includes(bal.sender)
+    )
+    .sort((a, b) => b.amount - a.amount)
 
   const groupedUserBalances: GroupedUserBalances = {
     recognizedDelegates: [],

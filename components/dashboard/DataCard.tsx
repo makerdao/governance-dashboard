@@ -18,13 +18,19 @@ const DataCard = ({ data, type, title }: Props): JSX.Element => {
     const cardData = data && [
       {
         name: 'Recognized',
-        delegates: data.filter((delegate) => delegate.status === 'recognized'),
+        delegates: data.filter((delegate) =>
+          showExpiredDelegates
+            ? delegate.status === 'recognized' ||
+              (delegate.expired === true && delegate.name)
+            : delegate.status === 'recognized'
+        ),
       },
       {
         name: 'Shadow',
         delegates: data.filter((delegate) =>
           showExpiredDelegates
-            ? delegate.status !== 'recognized'
+            ? delegate.status === 'shadow' ||
+              (delegate.expired === true && !delegate.name)
             : delegate.status === 'shadow'
         ),
       },

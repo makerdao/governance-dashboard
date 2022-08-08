@@ -75,10 +75,9 @@ export const DELEGATE_PLATFORMS = [
     members: ['mhonkasalo', 'teemulau'],
   },
   {
-    name: 'Governance House',
-    platform:
-      'https://forum.makerdao.com/t/governance-house-delegate-platform/15191',
-    members: ['GovernanceHouse'],
+    name: 'Llama',
+    platform: 'https://forum.makerdao.com/t/llama-delegate-platform/15191',
+    members: ['Llama'],
   },
   {
     name: 'Blockchain@Columbia',
@@ -101,5 +100,10 @@ export const DELEGATE_PLATFORMS = [
     name: 'ChicagoDAO',
     platform: 'https://forum.makerdao.com/t/chicagodao-delegate-platform/15358',
     members: ['sm_UC', 'mv_UC', 'af_UC'],
+  },
+  {
+    name: 'CodeKnight',
+    platform: 'https://forum.makerdao.com/t/codeknight-delegate-platform/16806',
+    members: ['CodeKnight'],
   },
 ]

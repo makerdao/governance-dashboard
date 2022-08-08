@@ -58,12 +58,16 @@ const Home = () => {
   const recognizedDelegates =
     governanceData &&
     governanceData.topDelegates.filter(
-      (delegate) => delegate.status === 'recognized'
+      (delegate) =>
+        delegate.status === 'recognized' ||
+        (delegate.expired === true && delegate.name)
     )
   const shadowDelegates =
     governanceData &&
     governanceData.topDelegates.filter(
-      (delegate) => delegate.status !== 'recognized'
+      (delegate) =>
+        delegate.status === 'shadow' ||
+        (delegate.expired === true && !delegate.name)
     )
 
   return (
