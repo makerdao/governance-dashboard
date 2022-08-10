@@ -20,11 +20,16 @@ export const getGovernanceData = async (): Promise<{
   mkrDelegatedData: MkrDelegatedData[]
   totalDelegatorCount: number
   allDelegations: AllDelegationsObject[]
+  sankeyData: { nodes: any[]; links: any[] }
 }> => {
   const delegationsRes = await getDelegations()
 
-  const { currentDelegatesBalance, delegations, totalDelegatorCount } =
-    delegationsRes
+  const {
+    currentDelegatesBalance,
+    delegations,
+    totalDelegatorCount,
+    sankeyData,
+  } = delegationsRes
 
   const topDelegates = currentDelegatesBalance.sort(
     (a, b) => +b.lockTotal - +a.lockTotal
@@ -60,6 +65,7 @@ export const getGovernanceData = async (): Promise<{
     mkrDelegatedData: mkrDelegatedData.slice(1),
     totalDelegatorCount,
     allDelegations,
+    sankeyData,
   }
 }
 
@@ -95,6 +101,7 @@ const getDelegations = async (): Promise<{
   currentDelegatesBalance: DelegateBalance[]
   delegations: DelegationObject[]
   totalDelegatorCount: number
+  sankeyData: { nodes: any[]; links: any[] }
 }> => {
   const delegates = await getAllDelegates()
   const rawDelegations = await Promise.all(
@@ -149,6 +156,8 @@ const getDelegations = async (): Promise<{
         delegatorCount,
         name: '',
         status: '',
+        expired: false,
+        isAboutToExpire: false,
       }
 
       return {
@@ -175,8 +184,10 @@ const getDelegations = async (): Promise<{
       )
       if (currentDelegate) {
         currentDelegate.name =
-          delegate.status === 'recognized' ? delegate.name : ''
+          delegate.name !== 'Shadow Delegate' ? delegate.name : ''
         currentDelegate.status = delegate.status
+        currentDelegate.expired = delegate.expired
+        currentDelegate.isAboutToExpire = delegate.isAboutToExpire
       }
     })
   }
@@ -202,7 +213,116 @@ const getDelegations = async (): Promise<{
     if (value > 0) totalDelegatorCount++
   })
 
-  return { currentDelegatesBalance, delegations, totalDelegatorCount }
+  const formattedDelegations: any[] = []
+  delegations
+    .filter(
+      ({ immediateCaller }) =>
+        !delegatesMetadata.some(
+          (del: any) =>
+            (del.status === 'shadow' || del.status === 'expired') &&
+            del.voteDelegateAddress === immediateCaller
+        )
+    )
+    .forEach(({ fromAddress, lockAmount, immediateCaller }) => {
+      const foundDelegator = formattedDelegations.find(
+        (delegator) => delegator.delegator === fromAddress
+      )
+      if (!foundDelegator)
+        formattedDelegations.push({
+          delegator: fromAddress,
+          totalDelegated: +lockAmount,
+          delegations: [{ delegate: immediateCaller, amount: +lockAmount }],
+        })
+      else {
+        const foundDelegate = foundDelegator.delegations.find(
+          (delegation: any) => delegation.delegate === immediateCaller
+        )
+        if (foundDelegate) {
+          foundDelegate.amount += +lockAmount
+          foundDelegator.totalDelegated += +lockAmount
+        } else {
+          foundDelegator.delegations.push({
+            delegate: immediateCaller,
+            amount: +lockAmount,
+          })
+          foundDelegator.totalDelegated += +lockAmount
+        }
+      }
+    })
+
+  const delegatorsToDelegates = formattedDelegations
+    .filter((delegator) => delegator.totalDelegated > 0)
+    .map((delegator) => ({
+      ...delegator,
+      delegations: delegator.delegations.filter(
+        (delegation: any) => delegation.amount > 0
+      ),
+    }))
+    .sort((a, b) => b.totalDelegated - a.totalDelegated)
+
+  const largeDelegators = delegatorsToDelegates.filter(
+    (delegator) => delegator.totalDelegated >= 1000
+  )
+  const otherDelegators = delegatorsToDelegates
+    .filter((delegator) => delegator.totalDelegated < 1000)
+    .reduce(
+      (acum, current) => {
+        acum.totalDelegated += current.totalDelegated
+        current.delegations.forEach((delegation: any) => {
+          const foundDelegateInAcum = acum.delegations.find(
+            (del: any) => del.delegate === delegation.delegate
+          )
+          if (foundDelegateInAcum)
+            foundDelegateInAcum.amount += delegation.amount
+          else
+            acum.delegations.push({
+              delegate: delegation.delegate,
+              amount: delegation.amount,
+            })
+        })
+
+        return acum
+      },
+      { delegator: 'others', totalDelegated: 0, delegations: [] }
+    )
+
+  const allDelegators = [...largeDelegators, otherDelegators]
+
+  const sankeyNodes = [
+    ...allDelegators.map((del) => del.delegator),
+    ...allDelegators.reduce((result, current) => {
+      current.delegations.forEach((delegation: any) =>
+        result.add(delegation.delegate)
+      )
+      return result
+    }, new Set()),
+  ].map((address) => ({ id: address }))
+
+  const sankeyLinks = [
+    ...allDelegators.flatMap(
+      ({ delegator, delegations: delegatorDelegations }) =>
+        delegatorDelegations
+          // @ts-ignore
+          .map(({ delegate, amount }) => ({
+            source: delegator,
+            target: delegate,
+            value: amount,
+          }))
+          .sort((a: any, b: any) => b.value - a.value)
+    ),
+  ]
+
+  const sankeyData = {
+    nodes: sankeyNodes,
+    links: sankeyLinks,
+  }
+
+  return {
+    currentDelegatesBalance,
+    delegations,
+    totalDelegatorCount,
+    sankeyData,
+  }
 }
 
 export const getStakedMkr = async (): Promise<{
@@ -247,29 +367,42 @@ export const getStakedMkr = async (): Promise<{
 
   const blockNumbersSet = new Set(stakeEvents.map((event) => event.blockNumber))
 
-  const query = `{
-    blocks(first: 1000 where: {number_in: [${Array.from(blockNumbersSet)}]}) {
-      number
-      timestamp
-    }
-  }`
-
-  const res = await fetch(
-    'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
-    {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
-    }
-  )
-
-  const data = await res.json()
-  const blockRes: { number: string; timestamp: string }[] = data.data.blocks
+  let first = 1000
+  let skip = 0
+  let total = 0
   const blocksMap: Map<number, string> = new Map()
-  blockRes.forEach((block) => blocksMap.set(+block.number, block.timestamp))
+
+  while (total < blockNumbersSet.size) {
+    const query = `{
+      blocks(first: ${first} skip: ${skip} where: {number_in: [${Array.from(
+      blockNumbersSet
+    )}]}) {
+        number
+        timestamp
+      }
+    }`
+
+    const res = await fetch(
+      'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      }
+    )
+
+    const data = await res.json()
+    const blockRes: { number: string; timestamp: string }[] = data.data.blocks
+    blockRes.forEach((block) => blocksMap.set(+block.number, block.timestamp))
+
+    total += first
+    skip += total
+    first =
+      blockNumbersSet.size - total < 1000 ? blockNumbersSet.size - total : 1000
+  }
 
   const mkrStakedData: MkrStakedData[] = []
 
@@ -456,10 +589,6 @@ export const getGroupedBalances = async (
 ): Promise<GroupedUserBalances | undefined> => {
   if (!delegates || !mkrBalancesData) return undefined
 
-  const balancesArr = mkrBalancesData[mkrBalancesData.length - 1].balances
-    .filter((bal) => bal.amount >= 0.01)
-    .sort((a, b) => b.amount - a.amount)
-
   const recognizedDelegatesMap = new Map<string, string>()
 
   const recognizedDelegates = delegates
@@ -472,6 +601,16 @@ export const getGroupedBalances = async (
   const shadowDelegates = delegates
     .filter((del) => del.status === 'shadow')
     .map((del) => del.voteDelegate)
+
+  const expiredDelegates = delegates
+    .filter((del) => del.expired)
+    .map((del) => del.voteDelegate)
+
+  const balancesArr = mkrBalancesData[mkrBalancesData.length - 1].balances
+    .filter(
+      (bal) => bal.amount >= 0.01 && !expiredDelegates.includes(bal.sender)
+    )
+    .sort((a, b) => b.amount - a.amount)
 
   const groupedUserBalances: GroupedUserBalances = {
     recognizedDelegates: [],

@@ -67,7 +67,10 @@ const ExecutiveTable = ({
         {title}
       </Typography>
       {Array.isArray(proposals) && proposals.length === 0 ? (
-        <Typography variant='h6'>
+        <Typography
+          variant='h6'
+          sx={{ color: (theme) => theme.palette.text.primary }}
+        >
           No active or pending {title.toLocaleLowerCase()} at the moment
         </Typography>
       ) : (

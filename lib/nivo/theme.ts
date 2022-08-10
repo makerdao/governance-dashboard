@@ -19,7 +19,6 @@ const getTheme = ({ palette }: MaterialTheme): NivoTheme => ({
     line: { stroke: palette.divider },
   },
   legends: {
-    title: { text: { fill: palette.text.primary } },
     text: { fill: palette.text.primary },
   },
   tooltip: {

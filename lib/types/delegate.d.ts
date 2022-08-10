@@ -25,6 +25,8 @@ export type DelegateBalance = {
   delegatorCount: number
   name: string
   status: string
+  expired: boolean
+  isAboutToExpire: boolean
 }
 
 export type MkrDelegatedData = {
