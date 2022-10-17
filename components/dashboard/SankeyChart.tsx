@@ -159,10 +159,55 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
                     style={{ backgroundColor: node.color }}
                   ></span>
                   <span>
-                    {node.id.length === 42 && node.id.startsWith('0x')
-                      ? node.id.slice(0, 8) + '...' + node.id.slice(-4)
-                      : node.id}
-                    : <b>{node.formattedValue}</b>
+                    {recognizedDelegates.find(
+                      (del) =>
+                        del.voteDelegate.toLowerCase() === node.id.toLowerCase()
+                    )?.name ||
+                      (node.id.length !== 42
+                        ? node.id
+                        : node.id.slice(0, 8) + '...' + node.id.slice(-4))}
+                    : <b>{node.formattedValue}</b> (
+                    {(
+                      (node.value * 100) /
+                      data?.links.reduce((acum, link) => acum + link.value, 0)
+                    ).toFixed(2)}
+                    %)
+                  </span>
+                </Card>
+              )}
+              linkTooltip={({ link }) => (
+                <Card className={styles.chartTooltip}>
+                  <span
+                    className={styles.tooltipCircle}
+                    style={{ backgroundColor: link.source.color }}
+                  ></span>
+                  <span>
+                    {link.source.id.length === 42 &&
+                    link.source.id.startsWith('0x')
+                      ? link.source.id.slice(0, 8) +
+                        '...' +
+                        link.source.id.slice(-4)
+                      : link.source.id}
+                    {' → '}
+                    <b>{link.formattedValue}</b>
+                    {' → '}
+                  </span>
+                  <span
+                    className={styles.tooltipCircle}
+                    style={{ backgroundColor: link.target.color }}
+                  ></span>
+                  <span>
+                    {recognizedDelegates.find(
+                      (del) =>
+                        del.voteDelegate.toLowerCase() ===
+                        link.target.id.toLowerCase()
+                    )?.name ||
+                      (link.target.id.length !== 42
+                        ? link.target.id
+                        : link.target.id.slice(0, 8) +
+                          '...' +
+                          link.target.id.slice(-4))}{' '}
+                    ({((link.value * 100) / link.target.value).toFixed(2)}%)
                   </span>
                 </Card>
               )}

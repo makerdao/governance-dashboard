@@ -13,8 +13,6 @@ const getForumComments = async (req: NextApiRequest, res: NextApiResponse) => {
 
     const topicForumRes = await fetch(delegatePlatform.platform + '.json')
     if (topicForumRes.status !== 200)
-      throw topicForumRes
-    if (topicForumRes.status !== 200)
       throw 'There was an error while fetching the forum topic'
 
     const topicForumResBody = await topicForumRes.json()

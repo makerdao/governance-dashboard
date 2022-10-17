@@ -45,7 +45,7 @@ export const getGovernanceData = async (): Promise<{
     .reduce((currVal, nextVal) => {
       mkrDelegatedData.push({
         time: new Date(nextVal.time),
-        amount: currVal + nextVal.amount,
+        amount: +(currVal + nextVal.amount).toFixed(2),
       })
 
       return currVal + nextVal.amount
@@ -60,9 +60,18 @@ export const getGovernanceData = async (): Promise<{
     })
   )
 
+  const mkrDelegatedMap = new Map<string, number>()
+  mkrDelegatedData.forEach((entry) => {
+    mkrDelegatedMap.set(entry.time.toDateString(), entry.amount)
+  })
+  const newMkrDelegatedData: MkrDelegatedData[] = []
+  mkrDelegatedMap.forEach((amount, time) => {
+    newMkrDelegatedData.push({ time: new Date(time), amount })
+  })
+
   return {
     topDelegates,
-    mkrDelegatedData: mkrDelegatedData.slice(1),
+    mkrDelegatedData: newMkrDelegatedData,
     totalDelegatorCount,
     allDelegations,
     sankeyData,
@@ -107,7 +116,7 @@ const getDelegations = async (): Promise<{
   const rawDelegations = await Promise.all(
     delegates.map(async (delegate) => {
       const query = `{
-        mkrLockedDelegate(argAddress: "${
+        mkrLockedDelegateArrayTotalsV2(argAddress: "${
           delegate.voteDelegate
         }", unixtimeEnd: ${Math.floor(Date.now() / 1000)}, unixtimeStart: 0) {
           nodes {
@@ -131,7 +140,14 @@ const getDelegations = async (): Promise<{
 
       const data = await res.json()
 
-      const delegations: DelegationObject[] = data.data.mkrLockedDelegate.nodes
+      const delegations: DelegationObject[] =
+        data.data.mkrLockedDelegateArrayTotalsV2.nodes.map(
+          (node: DelegationObject) => ({
+            ...node,
+            fromAddress: node.immediateCaller,
+            immediateCaller: delegate.voteDelegate,
+          })
+        )
 
       const delegatorsBalances: Map<string, number> = new Map()
       delegations.forEach((delegation) => {
@@ -416,8 +432,7 @@ export const getStakedMkr = async (): Promise<{
     .reduce((currVal, nextVal) => {
       mkrStakedData.push({
         time: nextVal.time,
-        amount: currVal + nextVal.amount,
-        sender: nextVal.sender,
+        amount: +(currVal + nextVal.amount).toFixed(2),
       })
 
       return currVal + nextVal.amount
@@ -430,7 +445,16 @@ export const getStakedMkr = async (): Promise<{
     amount: event.amount,
   }))
 
-  return { mkrStakedData, stakeEvents: parsedStakeEvents }
+  const mkrStakedMap = new Map<string, number>()
+  mkrStakedData.forEach((entry) => {
+    mkrStakedMap.set(entry.time.toDateString(), entry.amount)
+  })
+  const newMkrStakedData: MkrStakedData[] = []
+  mkrStakedMap.forEach((amount, time) => {
+    newMkrStakedData.push({ time: new Date(time), amount })
+  })
+
+  return { mkrStakedData: newMkrStakedData, stakeEvents: parsedStakeEvents }
 }
 
 export const getPollVoters = async (): Promise<PollVotersData[]> => {
@@ -532,7 +556,7 @@ export const getMkrBalances = async (
 ): Promise<UserBalances[] | undefined> => {
   if (!allDelegations || !stakeEvents) return undefined
 
-  const allTxs: (MkrStakedData & { delegate?: string })[] = [
+  const allTxs: (MkrStakedData & { delegate?: string; sender: string })[] = [
     ...allDelegations,
     ...stakeEvents,
   ].sort((a, b) => a.time.getTime() - b.time.getTime())
@@ -580,7 +604,16 @@ export const getMkrBalances = async (
     })),
   }))
 
-  return userBalances
+  const userBalancesMap = new Map<string, UserBalances['balances']>()
+  userBalances.forEach((entry) => {
+    userBalancesMap.set(entry.time.toDateString(), entry.balances)
+  })
+  const newUserBalances: UserBalances[] = []
+  userBalancesMap.forEach((balances, time) => {
+    newUserBalances.push({ time: new Date(time), balances })
+  })
+
+  return newUserBalances
 }
 
 export const getGroupedBalances = async (

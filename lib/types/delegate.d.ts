@@ -37,7 +37,6 @@ export type MkrDelegatedData = {
 export type MkrStakedData = {
   time: Date
   amount: number
-  sender: string
 }
 
 export type PollVotersData = {
