@@ -68,7 +68,13 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       <DashboardProvider>
         <TrackerProvider>
           <DelegatesProvider>
-            <div className={styles.container}>
+            <Box
+              className={styles.container}
+              sx={{
+                backgroundColor: (theme) => theme.palette.background.default,
+                colorScheme: (theme) => theme.palette.mode,
+              }}
+            >
               <Head>
                 <title>Governance Dashboard</title>
                 <meta
@@ -278,7 +284,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                   </div>
                 </Toolbar>
               </Box>
-            </div>
+            </Box>
           </DelegatesProvider>
         </TrackerProvider>
       </DashboardProvider>
