@@ -1,6 +1,6 @@
 <h1 align="center" style="margin-top: 1em; margin-bottom: 3em;">Governance Dashboard</h1>
 
-A dashboard containing Maker governance and delegation stats as well as proposals information
+A dashboard containing Maker governance and delegation stats as well as proposals information.
 
 ## Development
 
