@@ -277,10 +277,10 @@ const getDelegations = async (): Promise<{
     .sort((a, b) => b.totalDelegated - a.totalDelegated)
 
   const largeDelegators = delegatorsToDelegates.filter(
-    (delegator) => delegator.totalDelegated >= 1000
+    (delegator) => delegator.totalDelegated >= 500
   )
   const otherDelegators = delegatorsToDelegates
-    .filter((delegator) => delegator.totalDelegated < 1000)
+    .filter((delegator) => delegator.totalDelegated < 500)
     .reduce(
       (acum, current) => {
         acum.totalDelegated += current.totalDelegated
