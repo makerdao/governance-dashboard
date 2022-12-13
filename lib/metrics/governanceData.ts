@@ -497,13 +497,11 @@ export const getPollVoters = async (): Promise<PollVotersData[]> => {
   )
 
   const allPollsData = await allPollsRes.json()
-  console.log(allPollsData)
   const allPolls = allPollsData.data.activePolls.nodes
 
   const pollVoters: PollVotersData[] = await Promise.all(
     allPolls.map(
       async ({ pollId, startDate }: { pollId: number; startDate: number }) => {
-        console.log(pollId)
         const uniqueVotersQuery = `
           query uniqueVoters {
             uniqueVoters {
