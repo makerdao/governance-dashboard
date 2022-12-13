@@ -19,7 +19,7 @@ export const DELEGATE_PLATFORMS = [
   {
     name: 'Doo',
     platform: 'https://forum.makerdao.com/t/doo-delegate-platform/13246',
-    members: ['Doo_Nam'],
+    members: ['Doo_StableNode'],
   },
   {
     name: 'JustinCase',
@@ -94,7 +94,7 @@ export const DELEGATE_PLATFORMS = [
     name: 'London Business School',
     platform:
       'https://forum.makerdao.com/t/london-business-school-delegate-platform/15203',
-    members: ['clmns', 'Alex_Kearney', 'cryptonativephd'],
+    members: ['clmns', 'Alex_Kearney', 'cryptonativephd', 'park'],
   },
   {
     name: 'ChicagoDAO',
@@ -105,5 +105,43 @@ export const DELEGATE_PLATFORMS = [
     name: 'CodeKnight',
     platform: 'https://forum.makerdao.com/t/codeknight-delegate-platform/16806',
     members: ['CodeKnight'],
+  },
+  {
+    name: 'CalBlockchain',
+    platform:
+      'https://forum.makerdao.com/t/calblockchain-delegate-platform/18407',
+    members: ['CalBlockchain'],
+  },
+  {
+    name: 'Frontier Research LLC',
+    platform:
+      'https://forum.makerdao.com/t/frontier-research-delegate-platform/17298',
+    members: ['Matt_NZ'],
+  },
+  {
+    name: 'Jason Yanowitz',
+    platform:
+      'https://forum.makerdao.com/t/jason-yanowitz-delegate-platform/17408',
+    members: ['yano'],
+  },
+  {
+    name: 'ONESTONE',
+    platform: 'https://forum.makerdao.com/t/onestone-delegate-platform/17854',
+    members: ['TRUEMAKER'],
+  },
+  {
+    name: 'pvl',
+    platform: 'https://forum.makerdao.com/t/pvl-delegate-platform/16022',
+    members: ['pvl'],
+  },
+  {
+    name: 'ConsenSys',
+    platform: 'https://forum.makerdao.com/t/consensys-delegate-platform/18246',
+    members: ['DAOstrat.C'],
+  },
+  {
+    name: 'RiskDAO',
+    platform: 'https://forum.makerdao.com/t/riskdao-delegate-platform/18125',
+    members: ['nonstopTheo'],
   },
 ]

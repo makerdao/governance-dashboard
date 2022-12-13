@@ -80,7 +80,7 @@ export const getGovernanceData = async (): Promise<{
 
 const getAllDelegates = async (): Promise<DelegateObject[]> => {
   const query = `
-        {
+        query allDelegates {
           allDelegates {
             nodes {
               blockTimestamp
@@ -90,14 +90,17 @@ const getAllDelegates = async (): Promise<DelegateObject[]> => {
         }
       `
 
-  const res = await fetch('https://polling-db-prod.makerdux.com/api/v1', {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query }),
-  })
+  const res = await fetch(
+    'https://pollingdb2-mainnet-prod.makerdux.com/api/v1',
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query, operationName: 'allDelegates' }),
+    }
+  )
 
   const data = await res.json()
 
@@ -115,10 +118,8 @@ const getDelegations = async (): Promise<{
   const delegates = await getAllDelegates()
   const rawDelegations = await Promise.all(
     delegates.map(async (delegate) => {
-      const query = `{
-        mkrLockedDelegateArrayTotalsV2(argAddress: "${
-          delegate.voteDelegate
-        }", unixtimeEnd: ${Math.floor(Date.now() / 1000)}, unixtimeStart: 0) {
+      const query = `query mkrLockedDelegateArrayTotalsV2 {
+        mkrLockedDelegateArrayTotalsV2 {
           nodes {
             fromAddress
             blockTimestamp
@@ -129,14 +130,25 @@ const getDelegations = async (): Promise<{
         }
       }`
 
-      const res = await fetch('https://polling-db-prod.makerdux.com/api/v1', {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
-      })
+      const res = await fetch(
+        'https://pollingdb2-mainnet-prod.makerdux.com/api/v1',
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query,
+            operationName: 'mkrLockedDelegateArrayTotalsV2',
+            variables: {
+              argAddress: delegate.voteDelegate,
+              argUnixTimeStart: 0,
+              argUnixTimeEnd: Math.floor(Date.now() / 1000),
+            },
+          }),
+        }
+      )
 
       const data = await res.json()
 
@@ -458,48 +470,60 @@ export const getStakedMkr = async (): Promise<{
 }
 
 export const getPollVoters = async (): Promise<PollVotersData[]> => {
-  const allPollsQuery = `{
+  const allPollsQuery = `query activePolls {
     activePolls {
-      nodes {
-        pollId
-        startDate
+      edges {
+        node {
+          pollId
+          startDate
+        }
       }
     }
   }`
 
   const allPollsRes = await fetch(
-    'https://polling-db-prod.makerdux.com/api/v1',
+    'https://pollingdb2-mainnet-prod.makerdux.com/api/v1',
     {
       method: 'POST',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ query: allPollsQuery }),
+      body: JSON.stringify({
+        query: allPollsQuery,
+        operationName: 'activePolls',
+      }),
     }
   )
 
   const allPollsData = await allPollsRes.json()
+  console.log(allPollsData)
   const allPolls = allPollsData.data.activePolls.nodes
 
   const pollVoters: PollVotersData[] = await Promise.all(
     allPolls.map(
       async ({ pollId, startDate }: { pollId: number; startDate: number }) => {
-        const uniqueVotersQuery = `{
-      uniqueVoters(argPollId: ${pollId}) {
-        nodes
-      }
-    }`
+        console.log(pollId)
+        const uniqueVotersQuery = `
+          query uniqueVoters {
+            uniqueVoters {
+              nodes
+            }
+          }`
 
         const uniqueVotersRes = await fetch(
-          'https://polling-db-prod.makerdux.com/api/v1',
+          'https://pollingdb2-mainnet-prod.makerdux.com/api/v1',
           {
             method: 'POST',
             headers: {
               Accept: 'application/json',
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ query: uniqueVotersQuery }),
+            body: JSON.stringify({
+              query: uniqueVotersQuery,
+              operationName: 'uniqueVoters',
+              variables: { argPollId: pollId },
+            }),
           }
         )
 
