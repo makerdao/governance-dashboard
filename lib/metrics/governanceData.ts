@@ -362,23 +362,24 @@ export const getStakedMkr = async (): Promise<{
   }[]
 }> => {
   const contract = getContract(CHIEF_ADDRESS, CHIEF_ABI)
-  const lockEvents = await contract.queryFilter(
-    {
-      topics: [
-        '0xdd46706400000000000000000000000000000000000000000000000000000000',
-      ],
-    },
-    '0x487813'
-  )
-
-  const freeEvents = await contract.queryFilter(
-    {
-      topics: [
-        '0xd8ccd0f300000000000000000000000000000000000000000000000000000000',
-      ],
-    },
-    '0x487813'
-  )
+  const [lockEvents, freeEvents] = await Promise.all([
+    contract.queryFilter(
+      {
+        topics: [
+          '0xdd46706400000000000000000000000000000000000000000000000000000000',
+        ],
+      },
+      '0x487813'
+    ),
+    await contract.queryFilter(
+      {
+        topics: [
+          '0xd8ccd0f300000000000000000000000000000000000000000000000000000000',
+        ],
+      },
+      '0x487813'
+    ),
+  ])
 
   const stakeEvents = [
     ...lockEvents.map((event) => ({
@@ -395,42 +396,52 @@ export const getStakedMkr = async (): Promise<{
 
   const blockNumbersSet = new Set(stakeEvents.map((event) => event.blockNumber))
 
-  let first = 1000
-  let skip = 0
-  let total = 0
+  const numRequests = Math.floor(blockNumbersSet.size / 1000)
+  const remainderRequest = blockNumbersSet.size % 1000
+  const requestParamsArray = Array.from(Array(numRequests).keys()).map((i) => ({
+    first: 1000,
+    skip: i * 1000,
+  }))
+  if (remainderRequest !== 0)
+    requestParamsArray.push({
+      first: remainderRequest,
+      skip: numRequests * 1000,
+    })
+
   const blocksMap: Map<number, string> = new Map()
 
-  while (total < blockNumbersSet.size) {
-    const query = `{
-      blocks(first: ${first} skip: ${skip} where: {number_in: [${Array.from(
-      blockNumbersSet
-    )}]}) {
-        number
-        timestamp
-      }
-    }`
+  const [...blocksRes] = (
+    await Promise.all(
+      requestParamsArray.map(async ({ first, skip }) => {
+        const query = `{
+          blocks(first: ${first} skip: ${skip} where: {number_in: [${Array.from(
+          blockNumbersSet
+        )}]}) {
+            number
+            timestamp
+          }
+        }`
 
-    const res = await fetch(
-      'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
-      }
+        const queryRes = await fetch(
+          'https://api.thegraph.com/subgraphs/name/blocklytics/ethereum-blocks',
+          {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query }),
+          }
+        )
+
+        const data = await queryRes.json()
+        const res: { number: string; timestamp: string }[] = data.data.blocks
+        return res
+      })
     )
+  ).flat()
 
-    const data = await res.json()
-    const blockRes: { number: string; timestamp: string }[] = data.data.blocks
-    blockRes.forEach((block) => blocksMap.set(+block.number, block.timestamp))
-
-    total += first
-    skip += total
-    first =
-      blockNumbersSet.size - total < 1000 ? blockNumbersSet.size - total : 1000
-  }
+  blocksRes.forEach((block) => blocksMap.set(+block.number, block.timestamp))
 
   const mkrStakedData: MkrStakedData[] = []
 
