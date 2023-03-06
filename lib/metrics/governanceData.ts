@@ -508,7 +508,9 @@ export const getPollVoters = async (): Promise<PollVotersData[]> => {
   )
 
   const allPollsData = await allPollsRes.json()
-  const allPolls = allPollsData.data.activePolls.nodes
+  const allPolls = allPollsData.data.activePolls.edges.map(
+    (edge: any) => edge.node
+  )
 
   const pollVoters: PollVotersData[] = await Promise.all(
     allPolls.map(
@@ -521,7 +523,7 @@ export const getPollVoters = async (): Promise<PollVotersData[]> => {
           }`
 
         const uniqueVotersRes = await fetch(
-          'https://pollingdb2-mainnet-prod.makerdux.com/api/v1',
+          'https://pollingdb2-mainnet-staging.makerdux.com/api/v1',
           {
             method: 'POST',
             headers: {
