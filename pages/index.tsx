@@ -3,7 +3,7 @@ import useSWRImmutable from 'swr/immutable'
 import {
   getGovernanceData,
   getStakedMkr,
-  getPollVoters,
+  // getPollVoters,
   getMkrBalances,
   getGroupedBalances,
   getDelegatesBalances,
@@ -29,10 +29,10 @@ const Home = () => {
     '/stakedMkrData',
     getStakedMkr
   )
-  const { data: pollVotersData } = useSWRImmutable(
-    '/pollVotersData',
-    getPollVoters
-  )
+  // const { data: pollVotersData } = useSWRImmutable(
+  //   '/pollVotersData',
+  //   getPollVoters
+  // )
   const { data: mkrBalancesData } = useSWRImmutable(
     () => (governanceData && stakedMkrData ? '/mkrBalancesData' : null),
     () =>
@@ -116,10 +116,10 @@ const Home = () => {
         delegatesBalancesData={delegatesBalancesData}
       />
       <PieChart data={delegatesBalancesData} />
-      <BarChart
+      {/* <BarChart
         title='Average Unique Voters per poll per month'
         data={pollVotersData}
-      />
+      /> */}
     </>
   )
 }
