@@ -56,7 +56,7 @@ export type DelegateBalances = {
 }
 
 export type GroupedUserBalances = {
-  recognizedDelegates: {
+  constitutionalDelegates: {
     address: string
     amount: number
     name: string

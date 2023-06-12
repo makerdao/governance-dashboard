@@ -73,7 +73,7 @@ const PieChart = ({ data }: Props): JSX.Element => {
                 ? new Date(selectedTime).toLocaleDateString()
                 : 'now'}
               <InfoTooltip
-                text='You can select the time by clicking on a data point on the Recognized
+                text='You can select the time by clicking on a data point on the Constitutional
           Delegates Vote Weights chart'
               />
             </Typography>

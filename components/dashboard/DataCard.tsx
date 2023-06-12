@@ -17,12 +17,12 @@ const DataCard = ({ data, type, title }: Props): JSX.Element => {
   return useMemo(() => {
     const cardData = data && [
       {
-        name: 'Recognized',
+        name: 'Constitutional',
         delegates: data.filter((delegate) =>
           showExpiredDelegates
-            ? delegate.status === 'recognized' ||
+            ? delegate.status === 'constitutional' ||
               (delegate.expired === true && delegate.name)
-            : delegate.status === 'recognized'
+            : delegate.status === 'constitutional'
         ),
       },
       {

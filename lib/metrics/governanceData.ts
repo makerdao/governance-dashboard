@@ -657,12 +657,12 @@ export const getGroupedBalances = async (
 ): Promise<GroupedUserBalances | undefined> => {
   if (!delegates || !mkrBalancesData) return undefined
 
-  const recognizedDelegatesMap = new Map<string, string>()
+  const constitutionalDelegatesMap = new Map<string, string>()
 
-  const recognizedDelegates = delegates
-    .filter((del) => del.status === 'recognized')
+  const constitutionalDelegates = delegates
+    .filter((del) => del.status === 'constitutional')
     .map((del) => {
-      recognizedDelegatesMap.set(del.voteDelegate, del.name)
+      constitutionalDelegatesMap.set(del.voteDelegate, del.name)
       return del.voteDelegate
     })
 
@@ -681,7 +681,7 @@ export const getGroupedBalances = async (
     .sort((a, b) => b.amount - a.amount)
 
   const groupedUserBalances: GroupedUserBalances = {
-    recognizedDelegates: [],
+    constitutionalDelegates: [],
     shadowDelegates: [],
     users: [],
   }
@@ -689,10 +689,10 @@ export const getGroupedBalances = async (
   for (const { sender, amount } of balancesArr) {
     const formattedBalance = { address: sender, amount }
 
-    if (recognizedDelegates.includes(sender))
-      groupedUserBalances.recognizedDelegates.push({
+    if (constitutionalDelegates.includes(sender))
+      groupedUserBalances.constitutionalDelegates.push({
         ...formattedBalance,
-        name: recognizedDelegatesMap.get(sender) || '',
+        name: constitutionalDelegatesMap.get(sender) || '',
       })
     else if (shadowDelegates.includes(sender))
       groupedUserBalances.shadowDelegates.push(formattedBalance)

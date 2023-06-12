@@ -21,10 +21,10 @@ import { DelegateBalance } from '../../lib/types/delegate'
 
 type Props = {
   data: { nodes: any[]; links: any[] } | undefined
-  recognizedDelegates: DelegateBalance[] | undefined
+  constitutionalDelegates: DelegateBalance[] | undefined
 }
 
-const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
+const SankeyChart = ({ data, constitutionalDelegates }: Props): JSX.Element => {
   const theme = useTheme()
   const handle = useFullScreenHandle()
   const [chartData, setChartData] = useState<
@@ -83,7 +83,7 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
           </Box>
         </Box>
         <Card className={styles.pieChartContainer}>
-          {!chartData || !recognizedDelegates ? (
+          {!chartData || !constitutionalDelegates ? (
             <Skeleton
               variant='rectangular'
               height={'calc(100% - 1.7em)'}
@@ -126,7 +126,7 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
                   if (props.sourceLinks.length > 1) return 'others'
                   else {
                     const delegateDelegators =
-                      recognizedDelegates.find(
+                      constitutionalDelegates.find(
                         (del) =>
                           del.voteDelegate.toLowerCase() ===
                           props.sourceLinks[0].target.id.toLowerCase()
@@ -143,7 +143,7 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
                   }
                 } else
                   return (
-                    recognizedDelegates.find(
+                    constitutionalDelegates.find(
                       (del) =>
                         del.voteDelegate.toLowerCase() === nodeId.toLowerCase()
                     )?.name ||
@@ -159,7 +159,7 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
                     style={{ backgroundColor: node.color }}
                   ></span>
                   <span>
-                    {recognizedDelegates.find(
+                    {constitutionalDelegates.find(
                       (del) =>
                         del.voteDelegate.toLowerCase() === node.id.toLowerCase()
                     )?.name ||
@@ -197,7 +197,7 @@ const SankeyChart = ({ data, recognizedDelegates }: Props): JSX.Element => {
                     style={{ backgroundColor: link.target.color }}
                   ></span>
                   <span>
-                    {recognizedDelegates.find(
+                    {constitutionalDelegates.find(
                       (del) =>
                         del.voteDelegate.toLowerCase() ===
                         link.target.id.toLowerCase()

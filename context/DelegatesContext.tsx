@@ -44,7 +44,7 @@ interface DelegateData {
 }
 
 interface DelegateResData extends DelegateData {
-  status: 'recognized' | 'shadow'
+  status: 'constitutional' | 'shadow'
 }
 
 interface ContextProps {
@@ -83,7 +83,7 @@ export const DelegatesProvider = ({ children }: PropTypes): ReactElement => {
   useEffect(() => {
     if (rawDelegatesData && rawDelegatesData.length) {
       const parsedDelegatesData = rawDelegatesData
-        .filter((delegate: DelegateResData) => delegate.status === 'recognized')
+        .filter((delegate: DelegateResData) => delegate.status === 'constitutional')
         .map((delegate: DelegateResData) => ({
           name: delegate.name,
           voteDelegateAddress: delegate.voteDelegateAddress,
