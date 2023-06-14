@@ -4,12 +4,12 @@ import { DelegateBalance, DelegateBalances } from '../../../lib/types/delegate'
 import LineChart from './LineChart'
 
 type Props = {
-  constitutionalDelegates: DelegateBalance[] | undefined
+  alignedDelegates: DelegateBalance[] | undefined
   delegatesBalancesData: DelegateBalances[] | undefined
 }
 
 const DelegateWeightsLineChart = ({
-  constitutionalDelegates,
+  alignedDelegates,
   delegatesBalancesData,
 }: Props) => {
   const { setSelectedTime } = useDashboard()
@@ -18,9 +18,9 @@ const DelegateWeightsLineChart = ({
     () => (
       <LineChart
         data={
-          constitutionalDelegates &&
+          alignedDelegates &&
           delegatesBalancesData &&
-          constitutionalDelegates.map((del) => ({
+          alignedDelegates.map((del) => ({
             id: del.voteDelegate,
             data: delegatesBalancesData.map((entry) => ({
               x: entry.time,
@@ -32,7 +32,7 @@ const DelegateWeightsLineChart = ({
         }
         legendX='Date'
         legendY='MKR'
-        title='Constitutional Delegates Vote Weights'
+        title='Aligned Delegates Vote Weights'
         mkrColors={false}
         enableClick={true}
         clickFunction={setSelectedTime}
@@ -41,7 +41,7 @@ const DelegateWeightsLineChart = ({
         stacked={true}
       />
     ),
-    [delegatesBalancesData, constitutionalDelegates, setSelectedTime]
+    [delegatesBalancesData, alignedDelegates, setSelectedTime]
   )
 }
 

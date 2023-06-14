@@ -75,9 +75,9 @@ const SunburstChart = ({ title, data, customColors }: Props): JSX.Element => {
                   label: 'vote weights',
                   children: [
                     {
-                      name: 'Constitutional delegates',
-                      label: 'Constitutional delegates',
-                      children: data.constitutionalDelegates.map((usr) => ({
+                      name: 'Aligned delegates',
+                      label: 'Aligned delegates',
+                      children: data.alignedDelegates.map((usr) => ({
                         name: usr.address,
                         label: usr.name,
                         amount: usr.amount,
@@ -143,8 +143,8 @@ const SunburstChart = ({ title, data, customColors }: Props): JSX.Element => {
                 )}
                 onClick={(slice) => {
                   if (slice.depth !== 2) return
-                  if (slice.path[1] === 'Constitutional delegates') {
-                    const foundDelegate = data.constitutionalDelegates.find(
+                  if (slice.path[1] === 'Aligned delegates') {
+                    const foundDelegate = data.alignedDelegates.find(
                       (del) => del.address === slice.id
                     )
                     if (!foundDelegate) return
