@@ -55,11 +55,11 @@ const Home = () => {
   )
   // Fetch data - end
 
-  const recognizedDelegates =
+  const alignedDelegates =
     governanceData &&
     governanceData.topDelegates.filter(
       (delegate) =>
-        delegate.status === 'recognized' ||
+        delegate.status === 'aligned' ||
         (delegate.expired === true && delegate.name)
     )
   const shadowDelegates =
@@ -74,12 +74,12 @@ const Home = () => {
     <>
       <DashboardMoreMenu mkrBalancesData={mkrBalancesData} />
       <TableCard
-        title='Top Recognized Delegates'
-        delegates={recognizedDelegates}
+        title='Top Aligned Delegates'
+        delegates={alignedDelegates}
       />
       <SankeyChart
         data={governanceData?.sankeyData}
-        recognizedDelegates={recognizedDelegates}
+        alignedDelegates={alignedDelegates}
       />
       <DataCard
         title='Delegates count'
@@ -112,7 +112,7 @@ const Home = () => {
       />
       <IndividualMkrLineChart data={mkrBalancesData} />
       <DelegateWeightsLineChart
-        recognizedDelegates={recognizedDelegates}
+        alignedDelegates={alignedDelegates}
         delegatesBalancesData={delegatesBalancesData}
       />
       <PieChart data={delegatesBalancesData} />
